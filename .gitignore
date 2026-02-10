@@ -1,0 +1,29 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# next
+/.next
+/out
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+*.log
+
+# dotenv
+.env
+.env*.local
+
+# vercel
+.vercel
+
+# coverage
+/coverage
+
+# typescript
+*.tsbuildinfo
