@@ -1,5 +1,6 @@
 /* ===== C6 Atlas Landing Page Styles ===== */
 /* Reset & Base */
+
 :root {
     /* Colors */
     --color-bg-primary: #0a0a0a;
@@ -50,11 +51,6 @@
     --transition-slow: 0.5s ease;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 
 html {
     scroll-behavior: smooth;
@@ -1879,7 +1875,7 @@ textarea.form-input {
 
 .app-content {
   flex: 1;
-  padding: 140px 28px 64px;
+  padding: 100px 28px 64px;
 }
 
 .app-content .container {

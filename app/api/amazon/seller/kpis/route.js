@@ -1,6 +1,7 @@
 import { getSellerConfig } from "../../../../lib/amazon/config.js";
 import { getSellerKpis } from "../../../../lib/amazon/sellerClient.js";
 import { kpiMetrics } from "../../../../lib/sampleData.js";
+import cubeApi from "../../../../lib/cube.js";
 
 /**
  * GET /api/amazon/seller/kpis
@@ -8,11 +9,50 @@ import { kpiMetrics } from "../../../../lib/sampleData.js";
  * Uses live SP-API when configured; otherwise returns sample data.
  */
 export async function GET() {
+  const measures= await cubeApi.load({
+    "measures": [
+      "SellerOrderReports.sale",
+      "SellerOrderReports.unique_order_count"
+    ],
+    "dimensions": [],
+    "filters": []
+  }).then(response => {
+    const data = response.rawData().map((item) => {
+      return [
+        { label: "Total Orders", value: item['SellerOrderReports.unique_order_count'] },
+        { label: "Total Sales ($)", value: parseFloat(item['SellerOrderReports.sale']).toFixed(2) },
+      ]
+    });
+    return data[0]
+  });
+  const adsMeasures = await cubeApi.load({
+    "measures": [
+      "AdsCampaignReports.spend",
+      "AdsCampaignReports.purchases14d",
+      "AdsCampaignReports.acos",
+      "AdsCampaignReports.roas"
+    ]
+  }).then(response => {
+    const data = response.rawData().map((item) => {
+      return [
+        { label: "Amount Spent ($)", value: parseFloat(item['AdsCampaignReports.spend']).toFixed(2) },
+        { label: "Total Ad Orders", value: parseFloat(item['AdsCampaignReports.purchases14d']).toFixed(2) },
+        { label: "Total ROAS", value: parseFloat(item['AdsCampaignReports.acos']).toFixed(2) },
+        { label: "Total ACOS", value: parseFloat(item['AdsCampaignReports.roas']).toFixed(2) },
+      ]
+    });
+    return data[0]
+  });
+  return Response.json({
+    source: "api",
+    data: { metrics: [...measures,...adsMeasures] },
+  });
+
   const config = getSellerConfig();
   if (!config.configured) {
     return Response.json({
       source: "sample",
-      data: { metrics: kpiMetrics },
+      data: { metrics: [...measures,...adsMeasures] },
     });
   }
   try {

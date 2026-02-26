@@ -1,6 +1,7 @@
 import { getAdsConfig } from "../../../../lib/amazon/config.js";
 import { listKeywords, normalizeKeywordsForUi } from "../../../../lib/amazon/adsClient.js";
 import { keywordRows } from "../../../../lib/sampleData.js";
+import cubeApi from "../../../../lib/cube.js";
 
 /**
  * GET /api/amazon/ads/keywords
@@ -8,6 +9,43 @@ import { keywordRows } from "../../../../lib/sampleData.js";
  * Uses Amazon Advertising API when configured; otherwise sample data.
  */
 export async function GET(request) {
+
+  const data=await cubeApi.load({
+    "dimensions": [
+      "AdsKeywordReports.keyword_id",
+      "AdsKeywordReports.keyword_text",
+      "AdsKeywordReports.match_type"
+    ],
+    "measures": [
+      "AdsKeywordReports.clicks",
+      "AdsKeywordReports.cost",
+      "AdsKeywordReports.purchases14d",
+      "AdsKeywordReports.sales14d",
+      "AdsKeywordReports.roas",
+      "AdsKeywordReports.ctr",
+      "AdsKeywordReports.cpc",
+      "AdsKeywordReports.acos",
+    ]
+  }).then(result => {
+    return result.rawData().map(item => {
+      return {
+        id: item['AdsKeywordReports.keyword_id'],
+        term: item['AdsKeywordReports.keyword_text'],
+        match: item['AdsKeywordReports.match_type'],
+        spend: item['AdsKeywordReports.cost'],
+        clicks: item['AdsKeywordReports.clicks'],
+        orders: item['AdsKeywordReports.purchases14d'],
+        sales: item['AdsKeywordReports.sales14d'],
+        // conversion: "0%",
+        roas: parseFloat(item['AdsKeywordReports.roas']).toFixed(2) + "%",
+        ctr: item['AdsKeywordReports.ctr'],
+      }
+    });
+  });
+  return Response.json({
+    source: "api",
+    data: { rows: data },
+  });
   const config = getAdsConfig();
   if (!config.configured) {
     return Response.json({

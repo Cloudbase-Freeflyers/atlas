@@ -1,6 +1,7 @@
 import { getAdsConfig } from "../../../../lib/amazon/config.js";
 import { listCampaigns } from "../../../../lib/amazon/adsClient.js";
 import { adsMetrics, adsSeries } from "../../../../lib/sampleData.js";
+import cubeApi from "../../../../lib/cube.js";
 
 /**
  * GET /api/amazon/ads/overview
@@ -8,6 +9,56 @@ import { adsMetrics, adsSeries } from "../../../../lib/sampleData.js";
  * Uses Amazon Advertising API when configured; otherwise sample data.
  */
 export async function GET() {
+  const matrices=await cubeApi.load({
+    "measures": [
+      "AdsCampaignReports.sales",
+      "AdsCampaignReports.spend",
+      "AdsCampaignReports.purchases14d",
+      "AdsCampaignReports.acos",
+      "AdsCampaignReports.roas",
+      "AdsCampaignReports.impressions",
+      "AdsCampaignReports.clicks",
+      "AdsCampaignReports.cpc",
+      "AdsCampaignReports.ctr"
+  ]
+  }).then(response => {
+    const data=response.rawData().map(item=> [
+      {
+        label: "Total Ad Sales",
+        value:parseFloat(item['AdsCampaignReports.sales']).toFixed(2),
+      }, {
+        label: "Amount Spent",
+        value:parseFloat(item['AdsCampaignReports.spend']).toFixed(2),
+      }, {
+        label: "Total Ad Orders",
+        value:item['AdsCampaignReports.purchases14d']
+      },{
+        label: "ACOS",
+        value:parseFloat(item['AdsCampaignReports.acos']).toFixed(2)+'%',
+      }, {
+        label:"ROAS",
+        value:parseFloat(item['AdsCampaignReports.roas']).toFixed(2)+'%',
+      },{
+        label: "Impressions",
+        value:item['AdsCampaignReports.impressions']
+      },{
+        label: "Clicks",
+        value:item['AdsCampaignReports.clicks']
+      },{
+        label: "CPC",value:parseFloat(item['AdsCampaignReports.cpc']).toFixed(2),
+      },{
+        label: "CTR",value:parseFloat(item['AdsCampaignReports.ctr']).toFixed(2),
+      },{label: "Conversion Rate",value:'-'
+      }
+
+    ])
+    return data[0]
+  })
+  console.log(matrices)
+  return Response.json({
+    source: "api",
+    data: { metrics: matrices, },
+  });
   const config = getAdsConfig();
   if (!config.configured) {
     return Response.json({

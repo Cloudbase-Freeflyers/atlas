@@ -1,3 +1,6 @@
+import { Providers } from "./Providers"
+import "./tailwind.css"
+
 export default function RootLayout({ children }) {
     return (
         <html lang="en">
@@ -17,27 +20,29 @@ export default function RootLayout({ children }) {
                     rel="stylesheet"
                 />
             </head>
-            <body>
-                <nav className="nav">
-                    <div className="container">
-                        <div className="nav-content">
-                        <a href="/" className="nav-logo">
-                            <span className="logo-text">C6</span>
-                            <span className="logo-divider">/</span>
-                            <span className="logo-sub">Atlas</span>
-                        </a>
-                            <div className="nav-actions">
-                                <a href="/reports" className="nav-cta nav-cta-secondary">
-                                    Reports
-                                </a>
-                                <a href="#contact" className="nav-cta">
-                                    Get Started
-                                </a>
+            <body className={"dark"}>
+                <Providers>
+                    <nav className="nav">
+                        <div className="container">
+                            <div className="nav-content">
+                            <a href="/" className="nav-logo">
+                                <span className="logo-text">C6</span>
+                                <span className="logo-divider">/</span>
+                                <span className="logo-sub">Atlas</span>
+                            </a>
+                                <div className="nav-actions">
+                                    <a href="/reports" className="nav-cta nav-cta-secondary">
+                                        Reports
+                                    </a>
+                                    <a href="#contact" className="nav-cta">
+                                        Get Started
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </nav>
-                {children}
+                    </nav>
+                    {children}
+                </Providers>
             </body>
         </html>
     );

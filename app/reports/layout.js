@@ -2,13 +2,16 @@
 export const dynamic = "force-dynamic";
 
 import AmazonApiStatus from "../components/AmazonApiStatus";
+import TopBar from "../components/TopBar";
 
 export default function ReportsLayout({ children }) {
   return (
     <>
       <div className="app-shell">
+
         <main className="app-content">
-          <AmazonApiStatus />
+            <TopBar />
+          {/*<AmazonApiStatus />*/}
           <div className="container">{children}</div>
         </main>
       </div>
