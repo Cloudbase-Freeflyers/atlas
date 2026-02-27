@@ -4,10 +4,9 @@ import { useEffect, useState,useCallback } from "react";
 import TabBar from "../TabBar";
 import DataTable from "../DataTable";
 import {useGraph} from "../../hooks/useGraph";
+import LineChart from "../LineChart.js";
+import {useData} from "@/hooks/useData.js";
 
-
-import { ChartContainer } from "../ui/chart"
-import {Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts"
 
 
 const tabs = [
@@ -20,22 +19,49 @@ const tabs = [
 
 const columns = [
   { key: "name", label: "Campaign Name" },
-  { key: "spend", label: "Spend" },
-  { key: "impressions", label: "Impressions" },
-  { key: "clicks", label: "Clicks" },
-  { key: "orders", label: "Orders" },
-  { key: "sales", label: "Sales" },
-  { key: "conversion", label: "Conversion" },
-  { key: "roas", label: "ROAS" },
-  { key: "ctr", label: "CTR" },
-  { key: "acos", label: "ACOS" },
+  { key: "spend", label: "Spend",formatter: "currency" },
+  { key: "impressions", label: "Impressions",formatter: 'compact' },
+  { key: "clicks", label: "Clicks",formatter: 'compact' },
+  { key: "orders", label: "Orders",formatter: 'compact' },
+  { key: "sales", label: "Sales",formatter: "currency" },
+  { key: "conversion", label: "Conversion",formatter: 'compact' },
+  { key: "roas", label: "ROAS", formatter: "percent" },
+  { key: "ctr", label: "CTR",formatter: "percent" },
+  { key: "acos", label: "ACOS",formatter: "percent" },
 ];
 
 
 export default function ReportCampaigns() {
-  const [res, setRes] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const {data} = useGraph({
+  const {data:campaigns,isLoading} = useData({
+    "dimensions": [
+      "AdsCampaignReports.campaign_name",
+      "AdsCampaignReports.campaign_id",
+    ],
+    "measures": [
+      "AdsCampaignReports.clicks",
+      "AdsCampaignReports.cost",
+      "AdsCampaignReports.impressions",
+      "AdsCampaignReports.cost",
+      "AdsCampaignReports.sales14d",
+      "AdsCampaignReports.purchases14d",
+      "AdsCampaignReports.roas",
+      "AdsCampaignReports.ctr",
+      "AdsCampaignReports.cpc",
+      "AdsCampaignReports.acos",
+    ]
+  },(data)=>data.map(item=>({
+    name: item['AdsCampaignReports.campaign_name'],
+    id: item['AdsCampaignReports.campaign_id'],
+    clicks: item['AdsCampaignReports.clicks'],
+    impressions: item['AdsCampaignReports.impressions'],
+    spend: item['AdsCampaignReports.cost'],
+    sales: item['AdsCampaignReports.sales14d'],
+    orders: item['AdsCampaignReports.purchases14d'],
+    roas: item['AdsCampaignReports.roas'],
+    ctr: item['AdsCampaignReports.ctr'],
+    acos: item['AdsCampaignReports.acos'],
+  })),"campaigns")
+  const {data:graphData} = useData({
     "measures": [
       "AdsCampaignReports.spend",
       "AdsCampaignReports.sales",
@@ -62,19 +88,10 @@ export default function ReportCampaigns() {
       roas: item['AdsCampaignReports.roas'],
       acos: item['AdsCampaignReports.acos'],
     }
-  }))
-  useEffect(() => {
-    const base = typeof window !== "undefined" ? window.location.origin : "";
-    fetch(`${base}/api/amazon/ads/campaigns`)
-      .then((r) => r.json())
-      .then(setRes)
-      .catch(() => setRes({ source: "sample" }))
-      .finally(() => setLoading(false));
-  }, []);
+  }),"adsGraphs")
 
-  const source = res?.source ?? "sample";
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="grid" style={{ gap: 20 }}>
         <TabBar tabs={tabs} active="Campaigns" />
@@ -82,12 +99,9 @@ export default function ReportCampaigns() {
       </div>
     );
   }
-
-  const rows = res.data.rows ?? [];
   return (
     <div className="grid" style={{ gap: 20 }}>
       <TabBar tabs={tabs} active="Campaigns" />
-      <p className="reports-api-badge" aria-hidden>Live data from Amazon Advertising</p>
       <div className="card">
         <div className="card-inner">
           <div className="filter-row">
@@ -95,136 +109,46 @@ export default function ReportCampaigns() {
             <input className="input" placeholder="Spend USD" />
             <button className="button">Contains</button>
           </div>
-          <DataTable columns={columns} rows={rows} />
+          <DataTable columns={columns} rows={campaigns} />
         </div>
       </div>
       <div className={"tw:grid tw:grid-cols-2 tw:gap-2"}>
-        <div className="card">
-          <div className="card-inner">
-            <h3 className="text-lg font-semibold mb-4">Sales vs Spend</h3>
-            <div style={{ width: '100%', height: 400 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                    data={data}
-                    margin={{
-                      top: 5,
-                      right: 30,
-                      left: 20,
-                      bottom: 5,
-                    }}
-                >
-                  <CartesianGrid strokeDasharray="0 0" vertical={false} stroke="#f0f0f0" />
-                  <XAxis
-                      dataKey="date"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: '#666', fontSize: 12 }}
-                  />
-                  <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: '#666', fontSize: 12 }}
-                  />
-                  <Tooltip
-                      contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #ddd' }}
-                  />
-                  <Legend iconType="circle" />
-                  <Line
-                      type="monotone"
-                      dataKey="spend"
-                      name="Spend"
-                      stroke="#2563eb"
-                      strokeWidth={2}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
-                  />
-                  <Line
-                      type="monotone"
-                      dataKey="sales"
-                      name="Sales"
-                      stroke="#10b981"
-                      strokeWidth={2}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
-                  />
-                  {/*  <Line*/}
-                  {/*    type="monotone"*/}
-                  {/*    dataKey="impressions"*/}
-                  {/*    name="Impressions"*/}
-                  {/*    stroke="#ffd978"*/}
-                  {/*    strokeWidth={2}*/}
-                  {/*    dot={{ r: 4 }}*/}
-                  {/*    activeDot={{ r: 6 }}*/}
-                  {/*/>*/}
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-        <div className="card">
-          <div className="card-inner">
-            <h3 className="text-lg font-semibold mb-4">Acos VS ROAS</h3>
-            <div style={{ width: '100%', height: 400 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                    data={data}
-                    margin={{
-                      top: 5,
-                      right: 30,
-                      left: 20,
-                      bottom: 5,
-                    }}
-                >
-                  <CartesianGrid strokeDasharray="0 0" vertical={false} stroke="#f0f0f0" />
-                  <XAxis
-                      dataKey="date"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: '#666', fontSize: 12 }}
-                  />
-                  <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: '#666', fontSize: 12 }}
-                  />
-                  <Tooltip
-                      contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #ddd' }}
-                  />
-                  <Legend iconType="circle" />
-                  <Line
-                      type="monotone"
-                      dataKey="roas"
-                      name="Roas"
-                      stroke="#2563eb"
-                      strokeWidth={2}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
-                  />
-                  <Line
-                      type="monotone"
-                      dataKey="acos"
-                      name="Acos"
-                      stroke="#10b981"
-                      strokeWidth={2}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
-                  />
-                  {/*  <Line*/}
-                  {/*    type="monotone"*/}
-                  {/*    dataKey="impressions"*/}
-                  {/*    name="Impressions"*/}
-                  {/*    stroke="#ffd978"*/}
-                  {/*    strokeWidth={2}*/}
-                  {/*    dot={{ r: 4 }}*/}
-                  {/*    activeDot={{ r: 6 }}*/}
-                  {/*/>*/}
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
+        <LineChart
+            data={graphData}
+            title={"Sales vs Spend"}
+            xKey={'date'}
+            config={
+              {
+                sales:{
+                  key:'sales',
+                  name: "Sales",
+                  color: "#ac6cf0",
+                },
+                spend:{
+                  key:'spend',
+                  name: "Spend",
+                  color: "#6caaf0",
+                }}
+            }
+        />
+        <LineChart
+            data={graphData}
+            title={"Acos vs Roas"}
+            xKey={'date'}
+            config={{
+              acos:{
+              key:'acos',
+              name: "Acos",
+              color: "#f07c6c",
+            },
+              roas:{
+              key:'roas',
+              name: "Roas",
+              color: "#f0e96c",
+            }
+            }}
+        />
       </div>
-
     </div>
   );
 }

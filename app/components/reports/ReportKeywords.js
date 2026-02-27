@@ -6,6 +6,8 @@ import DataTable from "../DataTable";
 import LineChart from "../LineChart";
 import ReportsConnectMessage from "../ReportsConnectMessage";
 import { placeholderChartSeries } from "../../lib/sampleData";
+import {useGraph} from "../../hooks/useGraph.js";
+import {useData} from "@/hooks/useData.js";
 
 const tabs = [
   { label: "Overall KPIs", href: "/reports/overall-kpis" },
@@ -18,31 +20,74 @@ const tabs = [
 const columns = [
   { key: "term", label: "Target Term" },
   { key: "match", label: "Match Type" },
-  { key: "spend", label: "Spend" },
-  { key: "clicks", label: "Clicks" },
-  { key: "orders", label: "Orders" },
-  { key: "sales", label: "Sales" },
-  { key: "conversion", label: "Conversion" },
-  { key: "roas", label: "ROAS" },
-  { key: "ctr", label: "CTR" },
+  { key: "spend", label: "Spend",formatter: "currency" },
+  { key: "clicks", label: "Clicks",formatter: 'compact' },
+  { key: "orders", label: "Orders",formatter: 'compact' },
+  { key: "sales", label: "Sales",formatter: "currency" },
+  { key: "conversion", label: "Conversion",formatter: 'compact' },
+  { key: "roas", label: "ROAS",formatter: "percent" },
+  { key: "ctr", label: "CTR",formatter: "percent" },
 ];
 
 export default function ReportKeywords() {
-  const [res, setRes] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const {data:keywords,isLoading} = useData({
+    "dimensions": [
+      "AdsKeywordReports.keyword_id",
+      "AdsKeywordReports.keyword_text",
+      "AdsKeywordReports.match_type"
+    ],
+    "measures": [
+      "AdsKeywordReports.clicks",
+      "AdsKeywordReports.cost",
+      "AdsKeywordReports.purchases14d",
+      "AdsKeywordReports.sales14d",
+      "AdsKeywordReports.roas",
+      "AdsKeywordReports.ctr",
+      "AdsKeywordReports.cpc",
+      "AdsKeywordReports.acos",
+    ]
+  },(data)=>data.map(item=>({
+    id: item['AdsKeywordReports.keyword_id'],
+    term: item['AdsKeywordReports.keyword_text'],
+    match: item['AdsKeywordReports.match_type'],
+    spend: item['AdsKeywordReports.cost'],
+    clicks: item['AdsKeywordReports.clicks'],
+    orders: item['AdsKeywordReports.purchases14d'],
+    sales: item['AdsKeywordReports.sales14d'],
+    // conversion: "0%",
+    roas: item['AdsKeywordReports.roas'],
+    ctr: item['AdsKeywordReports.ctr'],
+  })),"campaigns")
+  const {data:graphData} = useData({
+    "measures": [
+      "AdsCampaignReports.spend",
+      "AdsCampaignReports.sales",
+      "AdsCampaignReports.impressions",
+      "AdsCampaignReports.acos",
+      "AdsCampaignReports.roas",
+    ],
+    "dimensions": [
+      "AdsCampaignReports.report_date"
+    ],
+    "timeDimensions": [
+      {
+        "dimension": "AdsCampaignReports.report_date",
+        "granularity": "day"
+      }
+    ]
+  },(data)=>data.map(item=>{
+    const date = new Date(item['AdsCampaignReports.report_date']);
+    return {
+      date: date.toLocaleDateString(),
+      spend: item['AdsCampaignReports.spend'],
+      sales: item['AdsCampaignReports.sales'],
+      impressions: item['AdsCampaignReports.impressions'],
+      roas: item['AdsCampaignReports.roas'],
+      acos: item['AdsCampaignReports.acos'],
+    }
+  }),"adsGraphs")
 
-  useEffect(() => {
-    const base = typeof window !== "undefined" ? window.location.origin : "";
-    fetch(`${base}/api/amazon/ads/keywords`)
-      .then((r) => r.json())
-      .then(setRes)
-      .catch(() => setRes({ source: "sample" }))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const source = res?.source ?? "sample";
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="grid" style={{ gap: 20 }}>
         <TabBar tabs={tabs} active="Keywords And Search Terms" />
@@ -51,39 +96,9 @@ export default function ReportKeywords() {
     );
   }
 
-  if (source !== "api") {
-    return (
-      <div className="grid" style={{ gap: 20 }}>
-        <TabBar tabs={tabs} active="Keywords And Search Terms" />
-        <ReportsConnectMessage
-          title="Keywords data unavailable"
-          description="Connect the Amazon Advertising API to see live keyword and search term performance here."
-        />
-        <div className="card">
-          <div className="card-inner">
-            <div className="filter-row">
-              <input className="input" placeholder="Campaign Name" />
-              <input className="input" placeholder="Spend USD" />
-              <input className="input" placeholder="Sales USD" />
-              <input className="input" placeholder="Clicks" />
-            </div>
-            <DataTable columns={columns} rows={[]} />
-          </div>
-        </div>
-        <div className="grid grid-2">
-          <LineChart title="Sales | Spend | Impressions" series={placeholderChartSeries} />
-          <LineChart title="ACOS vs ROAS" series={placeholderChartSeries} />
-        </div>
-      </div>
-    );
-  }
-
-  const rows = res.data.rows ?? [];
-
   return (
     <div className="grid" style={{ gap: 20 }}>
       <TabBar tabs={tabs} active="Keywords And Search Terms" />
-      <p className="reports-api-badge" aria-hidden>Live data from Amazon Advertising</p>
       <div className="card">
         <div className="card-inner">
           <div className="filter-row">
@@ -92,15 +107,46 @@ export default function ReportKeywords() {
             <input className="input" placeholder="Sales USD" />
             <input className="input" placeholder="Clicks" />
           </div>
-          <DataTable columns={columns} rows={rows} />
+          <DataTable columns={columns} rows={keywords} />
         </div>
       </div>
-      {(res.data.series?.length > 0) && (
-        <div className="grid grid-2">
-          <LineChart title="Sales | Spend | Impressions" series={res.data.series} />
-          <LineChart title="ACOS vs ROAS" series={res.data.series} />
-        </div>
-      )}
+      <div className={"tw:grid tw:grid-cols-2 tw:gap-2"}>
+        <LineChart
+            data={graphData}
+            title={"Sales vs Spend"}
+            xKey={'date'}
+            config={
+              {
+                sales:{
+                  key:'sales',
+                  name: "Sales",
+                  color: "#ac6cf0",
+                },
+                spend:{
+                  key:'spend',
+                  name: "Spend",
+                  color: "#6caaf0",
+                }}
+            }
+        />
+        <LineChart
+            data={graphData}
+            title={"Acos vs Roas"}
+            xKey={'date'}
+            config={{
+              acos:{
+                key:'acos',
+                name: "Acos",
+                color: "#f07c6c",
+              },
+              roas:{
+                key:'roas',
+                name: "Roas",
+                color: "#f0e96c",
+              }
+            }}
+        />
+      </div>
     </div>
   );
 }

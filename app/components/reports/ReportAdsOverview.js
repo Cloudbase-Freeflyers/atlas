@@ -7,6 +7,7 @@ import LineChart from "../LineChart";
 import AreaChart from "../AreaChart";
 import ReportsConnectMessage from "../ReportsConnectMessage";
 import { placeholderAdsMetrics, placeholderChartSeries } from "../../lib/sampleData";
+import {useGraph} from "@/hooks/useGraph.js";
 
 const tabs = [
   { label: "Overall KPIs", href: "/reports/overall-kpis" },
@@ -19,7 +20,36 @@ const tabs = [
 export default function ReportAdsOverview() {
   const [res, setRes] = useState(null);
   const [loading, setLoading] = useState(true);
-
+    const {data} = useGraph({
+        "measures": [
+            "AdsCampaignReports.spend",
+            "AdsCampaignReports.sales",
+            "AdsCampaignReports.acos",
+            "AdsCampaignReports.roas",
+            "AdsCampaignReports.ctr",
+            "AdsCampaignReports.cpc",
+        ],
+        "dimensions": [
+            "AdsCampaignReports.report_date"
+        ],
+        "timeDimensions": [
+            {
+                "dimension": "AdsCampaignReports.report_date",
+                "granularity": "day"
+            }
+        ]
+    },(data)=>data.map(item=>{
+        const date = new Date(item['AdsCampaignReports.report_date']);
+        return {
+            date: date.toLocaleDateString(),
+            spend: item['AdsCampaignReports.spend'],
+            sales: item['AdsCampaignReports.sales'],
+            ctr: item['AdsCampaignReports.ctr'],
+            cpc: item['AdsCampaignReports.cpc'],
+            roas: item['AdsCampaignReports.roas'],
+            acos: item['AdsCampaignReports.acos'],
+        }
+    }))
   useEffect(() => {
     const base = typeof window !== "undefined" ? window.location.origin : "";
     fetch(`${base}/api/amazon/ads/overview`)
@@ -79,12 +109,61 @@ export default function ReportAdsOverview() {
           </div>
         </div>
       )}
+        <div className={"tw:grid tw:grid-cols-2 tw:gap-2"}>
+            <LineChart
+                data={data}
+                title={"CTR vs CPC"}
+                xKey={'date'}
+                config={{
+                    cpc:{
+                        key:'cpc',
+                        name: "cpc",
+                        color: "#f0b76c",
+                    },
+                    ctr:{
+                        key:'ctr',
+                        name: "CTR",
+                        color: "#6c82f0",
+                    }
+                }}
+            />
+            <LineChart
+                data={data}
+                title={"Sales vs Spend"}
+                xKey={'date'}
+                config={
+                    {
+                        sales:{
+                            key:'sales',
+                            name: "Sales",
+                            color: "#ac6cf0",
+                        },
+                        spend:{
+                            key:'spend',
+                            name: "Spend",
+                            color: "#6caaf0",
+                        }}
+                }
+            />
+        </div>
       <div className="grid grid-2">
-        {series.length > 0 && <LineChart title="CTR vs CPC" series={series} />}
-        {series.length > 0 && <LineChart title="Sales vs Spend" series={series} />}
-      </div>
-      <div className="grid grid-2">
-        {series.length > 0 && <LineChart title="ACOS vs ROAS" series={series} />}
+          <LineChart
+              data={data}
+              title={"Acos vs Roas"}
+              xKey={'date'}
+              config={{
+                  acos:{
+                      key:'acos',
+                      name: "Acos",
+                      color: "#f07c6c",
+                  },
+                  roas:{
+                      key:'roas',
+                      name: "Roas",
+                      color: "#f0e96c",
+                  }
+              }}
+          />
         {series.length > 0 && <AreaChart title="Sales (Last 30 Days)" series={series} />}
       </div>
     </div>

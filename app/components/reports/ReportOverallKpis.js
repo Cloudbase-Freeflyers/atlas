@@ -7,6 +7,7 @@ import LineChart from "../LineChart";
 import GaugeChart from "../GaugeChart";
 import ReportsConnectMessage from "../ReportsConnectMessage";
 import { kpiMetricLabels, placeholderChartSeries } from "../../lib/sampleData";
+import {useGraph} from "@/hooks/useGraph.js";
 
 const tabs = [
   { label: "Overall KPIs", href: "/reports/overall-kpis" },
@@ -19,6 +20,36 @@ const tabs = [
 export default function ReportOverallKpis() {
   const [res, setRes] = useState(null);
   const [loading, setLoading] = useState(true);
+    const {data} = useGraph({
+        "measures": [
+            "AdsCampaignReports.spend",
+            "AdsCampaignReports.sales",
+            "AdsCampaignReports.acos",
+            "AdsCampaignReports.roas",
+            "AdsCampaignReports.ctr",
+            "AdsCampaignReports.cpc",
+        ],
+        "dimensions": [
+            "AdsCampaignReports.report_date"
+        ],
+        "timeDimensions": [
+            {
+                "dimension": "AdsCampaignReports.report_date",
+                "granularity": "day"
+            }
+        ]
+    },(data)=>data.map(item=>{
+        const date = new Date(item['AdsCampaignReports.report_date']);
+        return {
+            date: date.toLocaleDateString(),
+            spend: item['AdsCampaignReports.spend'],
+            sales: item['AdsCampaignReports.sales'],
+            ctr: item['AdsCampaignReports.ctr'],
+            cpc: item['AdsCampaignReports.cpc'],
+            roas: item['AdsCampaignReports.roas'],
+            acos: item['AdsCampaignReports.acos'],
+        }
+    }))
 
   useEffect(() => {
     const base = typeof window !== "undefined" ? window.location.origin : "";
@@ -65,7 +96,7 @@ export default function ReportOverallKpis() {
     );
   }
 
-  const showSpendData = !sellerOnly && res?.data?.series?.length > 0;
+  const showSpendData = true //!sellerOnly && res?.data?.series?.length > 0;
 
   return (
     <div className="grid" style={{ gap: 20 }}>
@@ -86,12 +117,29 @@ export default function ReportOverallKpis() {
       )}
       <div className="grid grid-2">
         {showSpendData ? (
-          <GaugeChart title="Total Spend" value={Number(res.data.spend) || 0} max={Number(res.data.spendMax) || 14000} />
+          <GaugeChart title="Total Spend" value={300} fill={'#ac6cf0'} max={500} />
         ) : (
           <GaugeChart title="Total Spend" value={0} max={1} empty />
         )}
         {showSpendData ? (
-          <LineChart title="Spend vs Sales" series={res.data.series.map((item) => ({ ...item, color: item.color }))} />
+            <LineChart
+                data={data}
+                title={"Sales vs Spend"}
+                xKey={'date'}
+                config={
+                    {
+                        sales:{
+                            key:'sales',
+                            name: "Sales",
+                            color: "#ac6cf0",
+                        },
+                        spend:{
+                            key:'spend',
+                            name: "Spend",
+                            color: "#6caaf0",
+                        }}
+                }
+            />
         ) : (
           <LineChart title="Spend vs Sales" series={placeholderChartSeries} />
         )}

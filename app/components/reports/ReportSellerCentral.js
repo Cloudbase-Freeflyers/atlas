@@ -7,6 +7,7 @@ import LineChart from "../LineChart";
 import DataTable from "../DataTable";
 import ReportsConnectMessage from "../ReportsConnectMessage";
 import { placeholderChartSeries } from "../../lib/sampleData";
+import {useData} from "@/hooks/useData.js";
 
 const tabs = [
   { label: "Sales distribution", href: "/reports/seller-central/sales-distribution" },
@@ -30,6 +31,43 @@ const columns = [
 ];
 
 export default function ReportSellerCentral() {
+  const {data:graphData,isLoading} = useData({
+    "dimensions": [
+      "PnlDistribution.report_date",
+      "PnlDistribution.company_id"
+    ],
+    "measures": [
+      "PnlDistribution.adCost",
+      "PnlDistribution.adSales",
+      "PnlDistribution.adUnits",
+      "PnlDistribution.organicSales",
+      "PnlDistribution.organicUnits",
+      "PnlDistribution.profit",
+      "PnlDistribution.totalSales",
+      "PnlDistribution.totalUnits"
+    ],"filters": [
+      {
+        "member": "PnlDistribution.company_id",
+        "operator": "equals",
+        "values": [
+          "1"
+        ]
+      }
+    ],"order": {
+      "PnlDistribution.report_date": "asc"
+    },
+  },(data)=>data.map(item=>({
+    date: new Date(item['PnlDistribution.report_date']).toLocaleDateString(),
+    adCost:item['PnlDistribution.adCost'],
+    adUnits:item['PnlDistribution.adUnits'],
+    adSales:item['PnlDistribution.adSales'],
+    organicSales:item['PnlDistribution.organicSales'],
+    organicUnits:item['PnlDistribution.organicUnits'],
+    profit:item['PnlDistribution.profit'],
+    totalSales:item['PnlDistribution.totalSales'],
+    totalUnits:item['PnlDistribution.totalUnits'],
+  })))
+  console.log(graphData)
   const [res, setRes] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +82,7 @@ export default function ReportSellerCentral() {
 
   const source = res?.source ?? "sample";
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="grid" style={{ gap: 20 }}>
         <TabBar tabs={tabs} active="P&L distribution" />
@@ -53,45 +91,43 @@ export default function ReportSellerCentral() {
     );
   }
 
-  if (source !== "api") {
-    return (
-      <div className="grid" style={{ gap: 20 }}>
-        <TabBar tabs={tabs} active="P&L distribution" />
-        <ReportsConnectMessage
-          title="Seller Central data unavailable"
-          description="Connect the Amazon Seller Central (SP-API) credentials to see live P&L, units, and product performance here."
-        />
-        <AreaChart title="P&L Distribution" series={placeholderChartSeries} />
-        <LineChart title="Units: Organic vs PPC" series={placeholderChartSeries} />
-        <div className="card">
-          <div className="card-inner">
-            <div className="filter-row">
-              <span className="toggle">
-                <span className="toggle-pill active"><span /></span>
-                Child ASINS
-              </span>
-              <input className="input" placeholder="Instant search" />
-              <button className="button">Columns</button>
-              <button className="button primary">Download</button>
-            </div>
-            <DataTable columns={columns} rows={[]} />
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const data = res.data ?? {};
-  const pAndlSeries = data.pAndlSeries ?? [];
-  const organicSeries = data.organicSeries ?? [];
   const rows = data.rows ?? [];
 
   return (
     <div className="grid" style={{ gap: 20 }}>
       <TabBar tabs={tabs} active="P&L distribution" />
-      <p className="reports-api-badge" aria-hidden>Live data from Amazon Seller Central</p>
-      {pAndlSeries.length > 0 && <AreaChart title="P&L Distribution" series={pAndlSeries} />}
-      {organicSeries.length > 0 && <LineChart title="Units: Organic vs PPC" series={organicSeries} />}
+      <AreaChart title="P&L Distribution" xKey={'date'} data={graphData} config={{
+        adCost:{
+          key:'adCost',
+          label: "Cost",
+          color: "#f07c6c",
+        },
+        totalSales:{
+          key:'totalSales',
+          label: "Sales",
+          color: "#f0e96c",
+        },
+        profit: {
+          key:'profit',
+          label: "Profit",
+          color: "#6cf096",
+        }
+      }} />
+      <LineChart title="Units: Organic vs PPC" xKey={'date'} data={graphData} config={{
+        organicUnits:{
+          key:'organicUnits',
+          label: "Organic Units",
+          color: "#98f06c",
+        },
+        adUnits:{
+          key:'adUnits',
+          label: "Ad Units",
+          color: "#f0e96c",
+        },
+      }} />
+      {/*{organicSeries.length > 0 && <LineChart title="Units: Organic vs PPC" series={organicSeries} />}*/}
       <div className="card">
         <div className="card-inner">
           <div className="filter-row">

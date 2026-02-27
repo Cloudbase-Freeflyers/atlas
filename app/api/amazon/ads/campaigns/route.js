@@ -33,14 +33,13 @@ export async function GET(request) {
                   name: campaign['AdsCampaignReports.campaign_name'],
                   id: campaign['AdsCampaignReports.campaign_id'],
                   clicks: campaign['AdsCampaignReports.clicks'],
-                  cost: campaign['AdsCampaignReports.cost'],
                   impressions: campaign['AdsCampaignReports.impressions'],
-                  spend: campaign['AdsCampaignReports.spend'],
+                  spend: campaign['AdsCampaignReports.cost'],
                   sales: campaign['AdsCampaignReports.sales14d'],
                   orders: campaign['AdsCampaignReports.purchases14d'],
-                  roas: parseFloat(campaign['AdsCampaignReports.roas']).toFixed(2) + "%",
+                  roas: parseFloat(campaign['AdsCampaignReports.roas']),
                   ctr: campaign['AdsCampaignReports.ctr'],
-                  acos: parseFloat(campaign['AdsCampaignReports.acos']).toFixed(2) + "%",
+                  acos: parseFloat(campaign['AdsCampaignReports.acos']),
               };
           });
       })

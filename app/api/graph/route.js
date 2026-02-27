@@ -12,7 +12,6 @@ export async function GET(request) {
   const data =  await cubeApi.load( JSON.parse(params)).then(response => {
     return response.rawData()
   });
-  console.log(data)
   return Response.json(data);
 
 }

@@ -10,14 +10,20 @@ import {
   ComboboxItem,
   ComboboxEmpty,
 } from "./ui/combobox";
+import {useData} from "@/hooks/useData.js";
 
-const companies = [
-  { id: "ik-multi", name: "IK Multimedia" },
-  { id: "northlight", name: "Northlight Labs" },
-  { id: "orbit", name: "Orbit Commerce" }
-];
+
 
 export default function CompanySelector() {
+  const {data:companies,isLoading} = useData({
+    "dimensions": [
+      "Companies.name",
+      "Companies.id"
+    ]
+  },(data)=>data.map(item=>({
+    name:item['Companies.name'],
+    id:item['Companies.id']
+  })),"companies")
   const { companyId, setCompanyId } = useFilters();
   const [search, setSearch] = React.useState("");
 
@@ -27,7 +33,7 @@ export default function CompanySelector() {
         c.name.toLowerCase().includes(search.toLowerCase())
       );
 
-  const selectedCompany = companies.find((c) => c.id === companyId);
+  const selectedCompany = companies && companies.find((c) => c.id === companyId);
 
   return (
     <div>
@@ -43,12 +49,12 @@ export default function CompanySelector() {
         />
         <ComboboxContent>
           <ComboboxList>
-            {filteredCompanies.map((company) => (
+            {filteredCompanies && filteredCompanies.map((company) => (
               <ComboboxItem key={company.id} value={company.id}>
                 {company.name}
               </ComboboxItem>
             ))}
-            {filteredCompanies.length === 0 && (
+            {filteredCompanies && filteredCompanies.length === 0 && (
               <ComboboxEmpty>No company found.</ComboboxEmpty>
             )}
           </ComboboxList>
