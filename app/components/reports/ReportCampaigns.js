@@ -72,12 +72,6 @@ export default function ReportCampaigns() {
     "dimensions": [
       "AdsCampaignReports.report_date"
     ],
-    "timeDimensions": [
-      {
-        "dimension": "AdsCampaignReports.report_date",
-        "granularity": "day"
-      }
-    ]
   },(data)=>data.map(item=>{
     const date = new Date(item['AdsCampaignReports.report_date']);
     return {
@@ -88,7 +82,7 @@ export default function ReportCampaigns() {
       roas: item['AdsCampaignReports.roas'],
       acos: item['AdsCampaignReports.acos'],
     }
-  }),"adsGraphs")
+  }),"adsGraphs","AdsCampaignReports.report_date")
 
 
   if (isLoading) {

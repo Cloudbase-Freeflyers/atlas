@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useFilters } from "../lib/FiltersContext";
+import { useAuth } from "../lib/authContext";
 import CompanySelector from "./CompanySelector";
 import DateRangePicker from "./DateRangePicker";
 import {Button} from "../components/ui/button.jsx";

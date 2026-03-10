@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {useEffect, useMemo, useState} from "react";
 import TabBar from "../TabBar";
 import MetricStrip from "../MetricStrip";
 import LineChart from "../LineChart";
@@ -8,6 +8,7 @@ import GaugeChart from "../GaugeChart";
 import ReportsConnectMessage from "../ReportsConnectMessage";
 import { kpiMetricLabels, placeholderChartSeries } from "../../lib/sampleData";
 import {useGraph} from "@/hooks/useGraph.js";
+import {useData} from "@/hooks/useData.js";
 
 const tabs = [
   { label: "Overall KPIs", href: "/reports/overall-kpis" },
@@ -20,7 +21,7 @@ const tabs = [
 export default function ReportOverallKpis() {
   const [res, setRes] = useState(null);
   const [loading, setLoading] = useState(true);
-    const {data} = useGraph({
+    const {data} = useData({
         "measures": [
             "AdsCampaignReports.spend",
             "AdsCampaignReports.sales",
@@ -49,22 +50,52 @@ export default function ReportOverallKpis() {
             roas: item['AdsCampaignReports.roas'],
             acos: item['AdsCampaignReports.acos'],
         }
-    }))
+    }),"overadskpigraph","AdsCampaignReports.report_date")
 
-  useEffect(() => {
-    const base = typeof window !== "undefined" ? window.location.origin : "";
-    fetch(`${base}/api/amazon/seller/kpis`)
-      .then((r) => r.json())
-      .then(setRes)
-      .catch(() => setRes({ source: "sample" }))
-      .finally(() => setLoading(false));
-  }, []);
+    const {data:salesKpis,isLoading:isLoadingSaleKpis} = useData({
+        "measures": [
+            "SellerOrderReports.sale",
+            "SellerOrderReports.unique_order_count"
+        ],
+    },(data)=>data.map(item=>([
+        {
+            label: "Total Orders",
+            value: item['SellerOrderReports.unique_order_count'],
+            formatter:"compact"
+        },
+        { label: "Total Sales ($)", value: item['SellerOrderReports.sale'],formatter:"currency" },
+    ])),"saleoverallkips","SellerOrderReports.purchase_date")
+    const {data:adsKpis,isLoading:isLoadingAdsKips} = useData({
+        "measures": [
+            "AdsCampaignReports.spend",
+            "AdsCampaignReports.purchases14d",
+            "AdsCampaignReports.acos",
+            "AdsCampaignReports.roas"
+        ]
+    },(data)=>data.map(item=>([
+        {
+            label: "Amount Spent ($)",
+            value: item['AdsCampaignReports.spend'],
+            formatter:"currency",
+        },
+        { label: "Total Ad Orders", value: item['AdsCampaignReports.purchases14d'],formatter:"compact" },
+        { label: "Total ROAS", value: item['AdsCampaignReports.acos'],formatter: "percent" },
+        { label: "Total ACOS", value: item['AdsCampaignReports.roas'],formatter:"percent" },
+    ])),"adsoverallkips","AdsCampaignReports.report_date")
 
-  const source = res?.source ?? "sample";
-  const sellerOnly = res?.data?.sellerOnly === true;
-  const metrics = source === "api" && res?.data?.metrics?.length ? res.data.metrics : null;
+  const isLoading=useMemo(()=>isLoadingAdsKips||isLoadingSaleKpis,[isLoadingAdsKips,isLoadingSaleKpis])
+    const kpis= useMemo(()=>{
+        const kips=[]
+        if (salesKpis&&salesKpis.length>0){
+            kips.push(...salesKpis[0])
+        }
+        if(adsKpis&&adsKpis.length>0){
+            kips.push(...adsKpis[0])
+        }
+        return kips
+    },[adsKpis,salesKpis])
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="grid" style={{ gap: 20 }}>
         <TabBar tabs={tabs} active="Overall KPIs" />
@@ -73,28 +104,6 @@ export default function ReportOverallKpis() {
     );
   }
 
-  const placeholderMetrics = kpiMetricLabels.map((label) => ({ label, value: "—" }));
-
-  if (source !== "api") {
-    return (
-      <div className="grid" style={{ gap: 20 }}>
-        <TabBar tabs={tabs} active="Overall KPIs" />
-        <ReportsConnectMessage
-          title="Live data unavailable"
-          description="Connect the Amazon Seller Central (SP-API) and, for spend metrics, the Advertising API to see KPIs here."
-        />
-        <div className="card">
-          <div className="card-inner">
-            <MetricStrip metrics={placeholderMetrics} />
-          </div>
-        </div>
-        <div className="grid grid-2">
-          <GaugeChart title="Total Spend" value={0} max={1} empty />
-          <LineChart title="Spend vs Sales" series={placeholderChartSeries} />
-        </div>
-      </div>
-    );
-  }
 
   const showSpendData = true //!sellerOnly && res?.data?.series?.length > 0;
 
@@ -102,18 +111,12 @@ export default function ReportOverallKpis() {
     <div className="grid" style={{ gap: 20 }}>
       <TabBar tabs={tabs} active="Overall KPIs" />
       <p className="reports-api-badge" aria-hidden>Live data from Amazon</p>
-      {metrics && (
+      {kpis.length>0 && (
         <div className="card">
           <div className="card-inner">
-            <MetricStrip metrics={metrics} />
+            <MetricStrip metrics={kpis} />
           </div>
         </div>
-      )}
-      {sellerOnly && (
-        <ReportsConnectMessage
-          title="Spend data unavailable"
-          description="Connect the Amazon Advertising API to see Total Spend and Spend vs Sales. Seller Central does not provide advertising spend."
-        />
       )}
       <div className="grid grid-2">
         {showSpendData ? (

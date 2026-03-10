@@ -1,6 +1,7 @@
 "use client";
 
 import { FiltersProvider } from "./lib/FiltersContext";
+import { AuthProvider } from "./lib/authContext";
 import {
   QueryClient,
   QueryClientProvider,
@@ -11,9 +12,11 @@ export function Providers({ children }) {
     const [queryClient] = useState(() => new QueryClient())
   return (
       <QueryClientProvider client={queryClient}>
-          <FiltersProvider>
-              {children}
-          </FiltersProvider>
+          <AuthProvider>
+              <FiltersProvider>
+                  {children}
+              </FiltersProvider>
+          </AuthProvider>
         <ReactQueryDevtools />
       </QueryClientProvider>
 

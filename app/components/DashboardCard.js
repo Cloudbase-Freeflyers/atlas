@@ -1,7 +1,12 @@
-import Link from "next/link";
+"use client";
 
-export default function DashboardCard({ href, title, description, stats, tag }) {
-  return (
+import Link from "next/link";
+import {formatValue} from "../lib/formatters.js";
+
+
+
+export default function DashboardCard({ href, title, description, stats, tag,isLoading }) {
+    return (
     <Link href={href} className="card-link fade-in">
       <div className="badge">{tag}</div>
       <h3>{title}</h3>
@@ -9,7 +14,7 @@ export default function DashboardCard({ href, title, description, stats, tag }) 
       <div className="meta">
         {stats.map((item) => (
           <span key={item.label} className={item.value === "—" ? "reports-placeholder" : undefined}>
-            {item.value} {item.label}
+            {formatValue(item.value,item.formatter)} {item.label}
           </span>
         ))}
       </div>

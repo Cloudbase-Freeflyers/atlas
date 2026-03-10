@@ -1,4 +1,5 @@
 import { Providers } from "./Providers"
+import { AuthGuard, Navigation } from "./auth-components"
 import "./tailwind.css"
 
 export default function RootLayout({ children }) {
@@ -22,26 +23,12 @@ export default function RootLayout({ children }) {
             </head>
             <body className={"dark"}>
                 <Providers>
-                    <nav className="nav">
-                        <div className="container">
-                            <div className="nav-content">
-                            <a href="/" className="nav-logo">
-                                <span className="logo-text">C6</span>
-                                <span className="logo-divider">/</span>
-                                <span className="logo-sub">Atlas</span>
-                            </a>
-                                <div className="nav-actions">
-                                    <a href="/reports" className="nav-cta nav-cta-secondary">
-                                        Reports
-                                    </a>
-                                    <a href="#contact" className="nav-cta">
-                                        Get Started
-                                    </a>
-                                </div>
-                            </div>
+                    <AuthGuard>
+                        <Navigation />
+                        <div className="tw:mt-[92px]">
+                            {children}
                         </div>
-                    </nav>
-                    {children}
+                    </AuthGuard>
                 </Providers>
             </body>
         </html>

@@ -18,13 +18,13 @@ const tabs = [
 ];
 
 const columns = [
-  { key: "product", label: "Product" },
-  { key: "orders", label: "Orders" },
-  { key: "units", label: "Units" },
-  { key: "sales", label: "Sales" },
-  { key: "profits", label: "Profits" },
-  { key: "ads", label: "Ads" },
-  { key: "acos", label: "ACOS" },
+  { key: "product", label: "Product", },
+  { key: "orders", label: "Orders",formatter:"compact" },
+  { key: "units", label: "Units",formatter:"compact" },
+  { key: "sales", label: "Sales",formatter:"currency" },
+  { key: "profits", label: "Profits" ,formatter:"currency"},
+  { key: "ads", label: "Ads",formatter:"currency" },
+  { key: "acos", label: "ACOS" ,formatter:"percent"},
   { key: "tacos", label: "TACOS" },
   { key: "sessions", label: "Sessions" },
   { key: "conversion", label: "Conversion" },
@@ -45,14 +45,6 @@ export default function ReportSellerCentral() {
       "PnlDistribution.profit",
       "PnlDistribution.totalSales",
       "PnlDistribution.totalUnits"
-    ],"filters": [
-      {
-        "member": "PnlDistribution.company_id",
-        "operator": "equals",
-        "values": [
-          "1"
-        ]
-      }
     ],"order": {
       "PnlDistribution.report_date": "asc"
     },
@@ -66,21 +58,36 @@ export default function ReportSellerCentral() {
     profit:item['PnlDistribution.profit'],
     totalSales:item['PnlDistribution.totalSales'],
     totalUnits:item['PnlDistribution.totalUnits'],
-  })))
-  console.log(graphData)
-  const [res, setRes] = useState(null);
-  const [loading, setLoading] = useState(true);
+  })),"sellercenteroverview","PnlDistribution.report_date")
 
-  useEffect(() => {
-    const base = typeof window !== "undefined" ? window.location.origin : "";
-    fetch(`${base}/api/amazon/seller/overview`)
-      .then((r) => r.json())
-      .then(setRes)
-      .catch(() => setRes({ source: "sample" }))
-      .finally(() => setLoading(false));
-  }, []);
 
-  const source = res?.source ?? "sample";
+
+  const {data:asisData} = useData({
+    "dimensions": [
+      "AsinPerformance.asin",
+      "SellerListingReports.item_name"
+    ],
+    "measures": [
+      "AsinPerformance.adCost",
+      "AsinPerformance.adSales",
+      "AsinPerformance.sales",
+      "AsinPerformance.organicSales",
+      "AsinPerformance.profit",
+      "AsinPerformance.totalQuantity",
+      "AsinPerformance.acos"
+    ]
+  },(data)=>data.map(item=>({
+    product:item['SellerListingReports.item_name'],
+    units:item['AsinPerformance.totalQuantity'],
+    sales:item['AsinPerformance.sales'],
+    profits:item['AsinPerformance.profit'],
+    ACOS:item['AsinPerformance.acos'],
+    // conversion:item['AsinPerformance.acos'],
+    // sessions:item['AsinPerformance.acos'],
+    // tacos:item['AsinPerformance.acos'],
+    // ads:item['AsinPerformance.profit'],
+    // orders:item['PnlDistribution.order'],
+  })),"asisData","AsinPerformance.report_date")
 
   if (isLoading) {
     return (
@@ -92,8 +99,6 @@ export default function ReportSellerCentral() {
   }
 
 
-  const data = res.data ?? {};
-  const rows = data.rows ?? [];
 
   return (
     <div className="grid" style={{ gap: 20 }}>
@@ -139,7 +144,7 @@ export default function ReportSellerCentral() {
             <button className="button">Columns</button>
             <button className="button primary">Download</button>
           </div>
-          <DataTable columns={columns} rows={rows} />
+          <DataTable columns={columns} rows={asisData} />
         </div>
       </div>
     </div>

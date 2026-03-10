@@ -14,9 +14,11 @@
     "@cubejs-client/core": "^1.6.16",
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-table": "^8.21.3",
+    "axios": "^1.13.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "js-cookie": "^3.0.5",
     "lucide-react": "^0.575.0",
     "next": "16.1.6",
     "postcss": "^8.5.6",
@@ -30,8 +32,8 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tanstack/react-query-devtools": "^5.91.3",
     "shadcn": "^3.8.5",
-    "tailwindcss": "^4",
-    "@tanstack/react-query-devtools": "^5.91.3"
+    "tailwindcss": "^4"
   }
 }

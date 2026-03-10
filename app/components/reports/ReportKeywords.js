@@ -57,7 +57,7 @@ export default function ReportKeywords() {
     // conversion: "0%",
     roas: item['AdsKeywordReports.roas'],
     ctr: item['AdsKeywordReports.ctr'],
-  })),"campaigns")
+  })),"keywrds","AdsKeywordReports.report_date")
   const {data:graphData} = useData({
     "measures": [
       "AdsCampaignReports.spend",
@@ -69,12 +69,6 @@ export default function ReportKeywords() {
     "dimensions": [
       "AdsCampaignReports.report_date"
     ],
-    "timeDimensions": [
-      {
-        "dimension": "AdsCampaignReports.report_date",
-        "granularity": "day"
-      }
-    ]
   },(data)=>data.map(item=>{
     const date = new Date(item['AdsCampaignReports.report_date']);
     return {
@@ -85,7 +79,7 @@ export default function ReportKeywords() {
       roas: item['AdsCampaignReports.roas'],
       acos: item['AdsCampaignReports.acos'],
     }
-  }),"adsGraphs")
+  }),"adsGraphs","AdsCampaignReports.report_date")
 
   if (isLoading) {
     return (

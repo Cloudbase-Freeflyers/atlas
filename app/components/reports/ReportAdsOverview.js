@@ -8,6 +8,7 @@ import AreaChart from "../AreaChart";
 import ReportsConnectMessage from "../ReportsConnectMessage";
 import { placeholderAdsMetrics, placeholderChartSeries } from "../../lib/sampleData";
 import {useGraph} from "@/hooks/useGraph.js";
+import {useData} from "@/hooks/useData.js";
 
 const tabs = [
   { label: "Overall KPIs", href: "/reports/overall-kpis" },
@@ -18,9 +19,7 @@ const tabs = [
 ];
 
 export default function ReportAdsOverview() {
-  const [res, setRes] = useState(null);
-  const [loading, setLoading] = useState(true);
-    const {data} = useGraph({
+  const {data} = useData({
         "measures": [
             "AdsCampaignReports.spend",
             "AdsCampaignReports.sales",
@@ -32,12 +31,6 @@ export default function ReportAdsOverview() {
         "dimensions": [
             "AdsCampaignReports.report_date"
         ],
-        "timeDimensions": [
-            {
-                "dimension": "AdsCampaignReports.report_date",
-                "granularity": "day"
-            }
-        ]
     },(data)=>data.map(item=>{
         const date = new Date(item['AdsCampaignReports.report_date']);
         return {
@@ -49,19 +42,62 @@ export default function ReportAdsOverview() {
             roas: item['AdsCampaignReports.roas'],
             acos: item['AdsCampaignReports.acos'],
         }
-    }))
-  useEffect(() => {
-    const base = typeof window !== "undefined" ? window.location.origin : "";
-    fetch(`${base}/api/amazon/ads/overview`)
-      .then((r) => r.json())
-      .then(setRes)
-      .catch(() => setRes({ source: "sample" }))
-      .finally(() => setLoading(false));
-  }, []);
+    }),"adsoverviewbydate","AdsCampaignReports.report_date")
 
-  const source = res?.source ?? "sample";
+    const {data:metrics,isLoading} = useData({
+        "measures": [
+            "AdsCampaignReports.spend",
+            "AdsCampaignReports.sales",
+            "AdsCampaignReports.purchases14d",
+            "AdsCampaignReports.impressions",
+            "AdsCampaignReports.clicks",
+            "AdsCampaignReports.acos",
+            "AdsCampaignReports.roas",
+            "AdsCampaignReports.ctr",
+            "AdsCampaignReports.cpc",
+        ]
+    },(data)=>data.map(item=>{
+        return [
+            {
+                label: "Total Ad Sales",
+                value:item['AdsCampaignReports.sales'],
+                formatter:"currency"
+            }, {
+                label: "Amount Spent",
+                value:item['AdsCampaignReports.spend'],
+                formatter:"currency"
+            }, {
+                label: "Total Ad Orders",
+                value:item['AdsCampaignReports.purchases14d'],
+                formatter:"compact"
+            },{
+                label: "ACOS",
+                value:item['AdsCampaignReports.acos'],
+                formatter:"percent"
+            }, {
+                label:"ROAS",
+                value:item['AdsCampaignReports.roas'],
+                formatter:"percent"
+            },{
+                label: "Impressions",
+                value:item['AdsCampaignReports.impressions'],
+                formatter:"compact"
+            },{
+                label: "Clicks",
+                value:item['AdsCampaignReports.clicks'],
+                formatter:"compact"
+            },{
+                label: "CPC",value:item['AdsCampaignReports.cpc'],
+                formatter:"percent"
+            },{
+                label: "CTR",value:item['AdsCampaignReports.ctr'],formatter:"percent"
+            },{label: "Conversion Rate",value:'-',formatter:(v)=>v
+            }
+        ]
+    }),"adsoverview","AdsCampaignReports.report_date")
 
-  if (loading) {
+
+    if (isLoading) {
     return (
       <div className="grid" style={{ gap: 20 }}>
         <TabBar tabs={tabs} active="Ads Overview" />
@@ -69,43 +105,15 @@ export default function ReportAdsOverview() {
       </div>
     );
   }
-
-  if (source !== "api") {
-    return (
-      <div className="grid" style={{ gap: 20 }}>
-        <TabBar tabs={tabs} active="Ads Overview" />
-        <ReportsConnectMessage
-          title="Advertising data unavailable"
-          description="Connect the Amazon Advertising API in your environment to see live metrics and charts here."
-        />
-        <div className="card">
-          <div className="card-inner">
-            <MetricGrid items={placeholderAdsMetrics} />
-          </div>
-        </div>
-        <div className="grid grid-2">
-          <LineChart title="CTR vs CPC" series={placeholderChartSeries} />
-          <LineChart title="Sales vs Spend" series={placeholderChartSeries} />
-        </div>
-        <div className="grid grid-2">
-          <LineChart title="ACOS vs ROAS" series={placeholderChartSeries} />
-          <AreaChart title="Sales (Last 30 Days)" series={placeholderChartSeries} />
-        </div>
-      </div>
-    );
-  }
-
-  const metrics = res.data.metrics ?? [];
-  const series = res.data.series ?? [];
-
+    console.log(metrics);
   return (
     <div className="grid" style={{ gap: 20 }}>
       <TabBar tabs={tabs} active="Ads Overview" />
       <p className="reports-api-badge" aria-hidden>Live data from Amazon Advertising</p>
-      {metrics.length > 0 && (
+      {metrics&&metrics.length > 0 && (
         <div className="card">
           <div className="card-inner">
-            <MetricGrid items={metrics} />
+            <MetricGrid items={metrics[0]} />
           </div>
         </div>
       )}
@@ -164,7 +172,7 @@ export default function ReportAdsOverview() {
                   }
               }}
           />
-        {series.length > 0 && <AreaChart title="Sales (Last 30 Days)" series={series} />}
+        {/*{series.length > 0 && <AreaChart title="Sales (Last 30 Days)" series={series} />}*/}
       </div>
     </div>
   );

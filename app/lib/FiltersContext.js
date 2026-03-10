@@ -7,10 +7,10 @@ const FiltersContext = createContext();
 
 export function FiltersProvider({ children }) {
   const [dateTimePeriod, setDateTimePeriod] = useState({
-    startDate: subDays(new Date(), 30),
+    startDate: subDays(new Date(), 15),
     endDate: new Date(),
   });
-  const [companyId, setCompanyId] = useState("ik-multi");
+  const [companyId, setCompanyId] = useState(null);
 
   // Sync with localStorage if needed or just keep in memory for now
   // For now, let's keep it simple as requested.

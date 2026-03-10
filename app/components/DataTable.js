@@ -38,6 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select"
+import {formatValue} from "../lib/formatters.js";
 
 export default function DataTable({ 
   columns: initialColumns, 
@@ -48,39 +49,6 @@ export default function DataTable({
 }) {
   
   // Helper for formatting values
-  const formatValue = React.useCallback((value, formatter) => {
-    if (value === null || value === undefined) return ""
-    
-    if (typeof formatter === "function") {
-      return formatter(value)
-    }
-
-    switch (formatter) {
-      case "currency":
-        return new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(value)
-      case "decimal":
-        return new Intl.NumberFormat("en-US", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }).format(value)
-      case "percent":
-        return new Intl.NumberFormat("en-US", {
-          style: "percent",
-          minimumFractionDigits: 2,
-        }).format(value / 100) // Assuming value is 0-100
-      case "compact":
-        return new Intl.NumberFormat("en-US", {
-          notation: "compact",
-          compactDisplay: "short",
-          maximumFractionDigits: 1,
-        }).format(value)
-      default:
-        return value
-    }
-  }, [])
 
   // Transform legacy columns to TanStack columns if needed
   const columns = React.useMemo(() => {
