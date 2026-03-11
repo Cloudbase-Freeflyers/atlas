@@ -30,6 +30,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+
 } from "./ui/table"
 import {
   Select,
@@ -43,9 +44,10 @@ import {formatValue} from "../lib/formatters.js";
 export default function DataTable({ 
   columns: initialColumns, 
   rows = [], 
-  allowPagination = true,
-  columnSelection = true,
-  searchKey = null
+  allowPagination = true, 
+  columnSelection = true, 
+  searchKey = null,
+  defaultMaxWidth = "auto"
 }) {
   
   // Helper for formatting values
@@ -54,18 +56,23 @@ export default function DataTable({
   const columns = React.useMemo(() => {
     if (!initialColumns) return []
     return initialColumns.map(col => {
-      // If it's already a TanStack column definition, return it
-      if (col.accessorKey || col.id) return col
+      // If it's already a TanStack column definition (has accessorKey or id)
+      // but we still want to support 'render' and 'maxWidth' if they were passed in
+      const isTanStack = col.accessorKey || col.id;
       
-      // If it's a legacy column (has 'key' and 'label')
-      return {
+      const columnDef = isTanStack ? { ...col } : {
         accessorKey: col.key,
         header: col.label,
-        cell: ({ row }) => {
-          const rawValue = row.getValue(col.key)
+      };
+
+      // Ensure cell rendering logic is applied if not already defined
+      if (!columnDef.cell) {
+        columnDef.cell = ({ row }) => {
+          const accessorKey = columnDef.accessorKey;
+          const rawValue = row.getValue(accessorKey);
           
           if (col.render) {
-            return col.render(row.original)
+            return col.render(row.original, rawValue)
           }
 
           const value = col.formatter ? formatValue(rawValue, col.formatter) : rawValue
@@ -73,14 +80,19 @@ export default function DataTable({
           const className =
             typeof value === "string" && value.startsWith("(")
               ? "tw:text-destructive tw:font-semibold"
-              : col.key?.includes("profit") && typeof value === "string"
+              : accessorKey?.includes("profit") && typeof value === "string"
                 ? "tw:text-destructive tw:font-semibold"
                 : "";
           return <span className={className}>{value}</span>
         }
       }
+
+      // Track maxWidth in the column definition for our own use
+      columnDef.maxWidth = col.maxWidth || defaultMaxWidth;
+
+      return columnDef;
     })
-  }, [initialColumns, formatValue])
+  }, [initialColumns, defaultMaxWidth])
 
   const [sorting, setSorting] = React.useState([])
   const [columnFilters, setColumnFilters] = React.useState([])
@@ -165,8 +177,17 @@ export default function DataTable({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const maxWidth = header.column.columnDef.maxWidth;
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead 
+                      key={header.id}
+                      style={maxWidth && maxWidth !== 'auto' ? {
+                        maxWidth: maxWidth,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      } : {}}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -186,11 +207,22 @@ export default function DataTable({
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const maxWidth = cell.column.columnDef.maxWidth;
+                    return (
+                      <TableCell 
+                        key={cell.id}
+                        style={maxWidth && maxWidth !== 'auto' ? {
+                          maxWidth: maxWidth,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        } : {}}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    )
+                  })}
                 </TableRow>
               ))
             ) : (
@@ -279,3 +311,4 @@ export default function DataTable({
     </div>
   )
 }
+

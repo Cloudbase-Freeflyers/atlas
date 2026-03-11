@@ -52,14 +52,14 @@ export default function ReportCampaigns() {
   },(data)=>data.map(item=>({
     name: item['AdsCampaignReports.campaign_name'],
     id: item['AdsCampaignReports.campaign_id'],
-    clicks: item['AdsCampaignReports.clicks'],
-    impressions: item['AdsCampaignReports.impressions'],
-    spend: item['AdsCampaignReports.cost'],
-    sales: item['AdsCampaignReports.sales14d'],
-    orders: item['AdsCampaignReports.purchases14d'],
-    roas: item['AdsCampaignReports.roas'],
-    ctr: item['AdsCampaignReports.ctr'],
-    acos: item['AdsCampaignReports.acos'],
+    clicks: item['AdsKeywordReports.clicks'],
+    impressions: item['AdsKeywordReports.impressions'],
+    spend: item['AdsKeywordReports.cost'],
+    sales: item['AdsKeywordReports.sales14d'],
+    orders: item['AdsKeywordReports.purchases14d'],
+    roas: item['AdsKeywordReports.roas'],
+    ctr: item['AdsKeywordReports.ctr'],
+    acos: item['AdsKeywordReports.acos'],
   })),"campaigns")
   const {data:graphData} = useData({
     "measures": [

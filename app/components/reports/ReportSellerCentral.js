@@ -8,6 +8,7 @@ import DataTable from "../DataTable";
 import ReportsConnectMessage from "../ReportsConnectMessage";
 import { placeholderChartSeries } from "../../lib/sampleData";
 import {useData} from "@/hooks/useData.js";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.jsx";
 
 const tabs = [
   { label: "Sales distribution", href: "/reports/seller-central/sales-distribution" },
@@ -18,7 +19,13 @@ const tabs = [
 ];
 
 const columns = [
-  { key: "product", label: "Product", },
+  { key: "product", label: "Product",maxWidth: "250px",
+    render: (row) => (<Tooltip>
+      <TooltipTrigger>{row.asin}</TooltipTrigger>
+      <TooltipContent>
+        <p>{row.product}</p>
+      </TooltipContent>
+    </Tooltip>)},
   { key: "orders", label: "Orders",formatter:"compact" },
   { key: "units", label: "Units",formatter:"compact" },
   { key: "sales", label: "Sales",formatter:"currency" },
@@ -74,18 +81,25 @@ export default function ReportSellerCentral() {
       "AsinPerformance.organicSales",
       "AsinPerformance.profit",
       "AsinPerformance.totalQuantity",
-      "AsinPerformance.acos"
-    ]
+      "AsinPerformance.acos",
+      "AsinPerformance.order_count"
+    ],
+    "order": {
+      "AsinPerformance.sales": "desc"
+    }
   },(data)=>data.map(item=>({
     product:item['SellerListingReports.item_name'],
+    asin:item['AsinPerformance.asin'],
+    orders:item['AsinPerformance.order_count'],
+
     units:item['AsinPerformance.totalQuantity'],
     sales:item['AsinPerformance.sales'],
     profits:item['AsinPerformance.profit'],
-    ACOS:item['AsinPerformance.acos'],
+    acos:item['AsinPerformance.acos'],
     // conversion:item['AsinPerformance.acos'],
     // sessions:item['AsinPerformance.acos'],
     // tacos:item['AsinPerformance.acos'],
-    // ads:item['AsinPerformance.profit'],
+    ads:item['AsinPerformance.adSales'],
     // orders:item['PnlDistribution.order'],
   })),"asisData","AsinPerformance.report_date")
 
