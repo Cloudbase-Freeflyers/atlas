@@ -32,9 +32,9 @@ const columns = [
   { key: "profits", label: "Profits" ,formatter:"currency"},
   { key: "ads", label: "Ads",formatter:"currency" },
   { key: "acos", label: "ACOS" ,formatter:"percent"},
-  { key: "tacos", label: "TACOS" },
+  { key: "tacos", label: "TACOS",formatter:"percent" },
   { key: "sessions", label: "Sessions" },
-  { key: "conversion", label: "Conversion" },
+  { key: "conversion", label: "Conversion",formatter:"percent" },
 ];
 
 export default function ReportSellerCentral() {
@@ -71,37 +71,40 @@ export default function ReportSellerCentral() {
 
   const {data:asisData} = useData({
     "dimensions": [
-      "AsinPerformance.asin",
+      "ProductStats.asin",
       "SellerListingReports.item_name"
     ],
     "measures": [
-      "AsinPerformance.adCost",
-      "AsinPerformance.adSales",
-      "AsinPerformance.sales",
-      "AsinPerformance.organicSales",
-      "AsinPerformance.profit",
-      "AsinPerformance.totalQuantity",
-      "AsinPerformance.acos",
-      "AsinPerformance.order_count"
+      "ProductStats.acos",
+      "ProductStats.adCost",
+      "ProductStats.adSales",
+      "ProductStats.adUnits",
+      "ProductStats.conversions",
+      "ProductStats.orders",
+      "ProductStats.profit",
+      "ProductStats.sales",
+      "ProductStats.sessions",
+      "ProductStats.tacos",
+      "ProductStats.units"
     ],
     "order": {
-      "AsinPerformance.sales": "desc"
+      "ProductStats.sales": "desc"
     }
   },(data)=>data.map(item=>({
     product:item['SellerListingReports.item_name'],
-    asin:item['AsinPerformance.asin'],
-    orders:item['AsinPerformance.order_count'],
+    asin:item['ProductStats.asin'],
+    orders:item["ProductStats.orders"],
 
-    units:item['AsinPerformance.totalQuantity'],
-    sales:item['AsinPerformance.sales'],
-    profits:item['AsinPerformance.profit'],
-    acos:item['AsinPerformance.acos'],
-    // conversion:item['AsinPerformance.acos'],
-    // sessions:item['AsinPerformance.acos'],
-    // tacos:item['AsinPerformance.acos'],
-    ads:item['AsinPerformance.adSales'],
+    units:item['ProductStats.units'],
+    sales:item['ProductStats.sales'],
+    profits:item['ProductStats.profit'],
+    acos:item['ProductStats.acos'],
+    conversion:item['ProductStats.conversions'],
+    sessions:item['ProductStats.sessions'],
+    tacos:item['ProductStats.tacos'],
+    ads:item['ProductStats.adSales'],
     // orders:item['PnlDistribution.order'],
-  })),"asisData","AsinPerformance.report_date")
+  })),"asisData","ProductStats.report_date")
 
   if (isLoading) {
     return (

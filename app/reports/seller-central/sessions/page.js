@@ -6,6 +6,7 @@ import LineChart from "../../../components/LineChart";
 import DataTable from "../../../components/DataTable";
 import ReportsConnectMessage from "../../../components/ReportsConnectMessage";
 import { placeholderChartSeries } from "../../../lib/sampleData";
+import {useData} from "@/hooks/useData.js";
 
 const tabs = [
   { label: "Sales distribution", href: "/reports/seller-central/sales-distribution" },
@@ -24,58 +25,75 @@ const columns = [
 ];
 
 export default function SessionsPage() {
-  const [res, setRes] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const base = typeof window !== "undefined" ? window.location.origin : "";
-    fetch(`${base}/api/amazon/seller/sessions`)
-      .then((r) => r.json())
-      .then(setRes)
-      .catch(() => setRes({ source: "sample" }))
-      .finally(() => setLoading(false));
-  }, []);
+  const {data,isLoading} = useData({
+    "measures": [
+      "SellerSalesTrafficReports.sessions",
+      "SellerSalesTrafficReports.unit_session_percentage"
+    ],
+    "dimensions": [
+      "SellerSalesTrafficReports.report_date"
+    ],
+    "order": {
+      "SellerSalesTrafficReports.report_date": "asc"
+    }
+  },(data)=>data.map(item=>({
+    date: new Date(item['SellerSalesTrafficReports.report_date']).toLocaleDateString(),
+      sessions:item['SellerSalesTrafficReports.sessions'],
+    unit_session_percentage:item['SellerSalesTrafficReports.unit_session_percentage'],
+  })),'sessiongraph','SellerSalesTrafficReports.report_date')
 
-  const source = res?.source ?? "sample";
 
-  if (loading) {
+  const {data:tableData} = useData({
+    "measures": [
+      "SellerSalesTrafficReports.sessions",
+      "SellerSalesTrafficReports.unit_session_percentage",
+      "SellerSalesTrafficReports.units_ordered",
+      "SellerSalesTrafficReports.page_views"
+    ],
+    "dimensions": [
+      "SellerSalesTrafficReports.child_asin",
+    ],
+    "order": {
+      "SellerSalesTrafficReports.report_date": "asc"
+    }
+  },(data)=>data.map(item=>({
+    asin: item['SellerSalesTrafficReports.child_asin'],
+    sessions:item['SellerSalesTrafficReports.sessions'],
+    unitSessionPct:item['SellerSalesTrafficReports.unit_session_percentage'],
+    unitsOrdered:item['SellerSalesTrafficReports.units_ordered'],
+    pageViews:item['SellerSalesTrafficReports.page_views'],
+  })),'sessiontable','SellerSalesTrafficReports.report_date')
+
+  if (isLoading) {
     return (
-      <div className="grid" style={{ gap: 20 }}>
-        <TabBar tabs={tabs} active="Sessions" />
-        <div className="card"><div className="card-inner"><p className="reports-loading">Loading…</p></div></div>
-      </div>
+        <div className="grid" style={{ gap: 20 }}>
+          <TabBar tabs={tabs} active="Units" />
+          <div className="card"><div className="card-inner"><p className="reports-loading">Loading…</p></div></div>
+        </div>
     );
   }
-
-  if (source !== "api") {
-    return (
-      <div className="grid" style={{ gap: 20 }}>
-        <TabBar tabs={tabs} active="Sessions" />
-        <ReportsConnectMessage
-          title="Sessions data unavailable"
-          description="Connect the Amazon Seller Central (SP-API) to see live sessions and unit session data here."
-        />
-        <LineChart title="Sessions + Unit Session %" series={placeholderChartSeries} />
-      </div>
-    );
-  }
-
-  const data = res.data ?? {};
-  const series = data.series ?? [];
-  const rows = data.rows ?? [];
-
   return (
     <div className="grid" style={{ gap: 20 }}>
       <TabBar tabs={tabs} active="Sessions" />
       <p className="reports-api-badge" aria-hidden>Live data from Amazon Seller Central</p>
-      {series.length > 0 && <LineChart title="Sessions + Unit Session %" series={series} />}
-      {rows.length > 0 && (
-        <div className="card">
-          <div className="card-inner">
-            <DataTable columns={columns} rows={rows} />
-          </div>
+      <LineChart title="Sessions + Unit Session %" xKey={'date'} data={data} config={{
+        unit_session_percentage:{
+          key:'unit_session_percentage',
+          label: "Unit Session %",
+          color: "#98f06c",
+        },
+        sessions:{
+          key:'sessions',
+          label: "Sessions",
+          color: "#f0e96c",
+        },
+      }} />
+      <div className="card">
+        <div className="card-inner">
+          <DataTable columns={columns} rows={tableData} />
         </div>
-      )}
+      </div>
     </div>
   );
 }

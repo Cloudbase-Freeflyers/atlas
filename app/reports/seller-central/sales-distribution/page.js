@@ -63,37 +63,38 @@ export default function SalesDistributionPage() {
     })),"sellercenteroverview","PnlDistribution.report_date")
     const {data:asisData} = useData({
         "dimensions": [
-            "AsinPerformance.asin",
-            "AsinPerformance.company_id",
+            "ProductStats.asin",
             "SellerListingReports.item_name"
         ],
         "measures": [
-            "AsinPerformance.adCost",
-            "AsinPerformance.adSales",
-            "AsinPerformance.sales",
-            "AsinPerformance.organicSales",
-            "AsinPerformance.profit",
-            "AsinPerformance.totalQuantity",
-            "AsinPerformance.acos",
-            "AsinPerformance.order_count"
+            "ProductStats.acos",
+            "ProductStats.adCost",
+            "ProductStats.adSales",
+            "ProductStats.adUnits",
+            "ProductStats.conversions",
+            "ProductStats.orders",
+            "ProductStats.profit",
+            "ProductStats.sales",
+            "ProductStats.sessions",
+            "ProductStats.tacos",
+            "ProductStats.units"
         ],
         "order": {
-            "AsinPerformance.sales": "desc"
+            "ProductStats.sales": "desc"
         }
     },(data)=>data.map(item=>({
         product:item['SellerListingReports.item_name'],
-        asin:item['AsinPerformance.asin'],
-        orders:item['AsinPerformance.order_count'],
-        units:item['AsinPerformance.totalQuantity'],
-        sales:item['AsinPerformance.sales'],
-        profits:item['AsinPerformance.profit'],
-        ACOS:item['AsinPerformance.acos'],
+        asin:item['ProductStats.asin'],
+        orders:item['ProductStats.orders'],
+        units:item['ProductStats.units'],
+        sales:item['ProductStats.sales'],
+        profits:item['ProductStats.profit'],
+        ACOS:item['ProductStats.acos'],
         // conversion:item['AsinPerformance.acos'],
         // sessions:item['AsinPerformance.acos'],
         // tacos:item['AsinPerformance.acos'],
-        // ads:item['AsinPerformance.profit'],
-        // orders:item['PnlDistribution.order'],
-    })),"asisData2","AsinPerformance.report_date")
+        ads:item['ProductStats.adSales'],
+    })),"asisData2","ProductStats.report_date")
 
 
   if (isLoading) {

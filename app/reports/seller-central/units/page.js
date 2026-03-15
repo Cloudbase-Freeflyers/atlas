@@ -7,6 +7,7 @@ import DataTable from "../../../components/DataTable";
 import ReportsConnectMessage from "../../../components/ReportsConnectMessage";
 import { placeholderChartSeries } from "../../../lib/sampleData";
 import {useData} from "@/hooks/useData.js";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.jsx";
 
 const tabs = [
   { label: "Sales distribution", href: "/reports/seller-central/sales-distribution" },
@@ -17,15 +18,19 @@ const tabs = [
 ];
 
 const columns = [
-  { key: "product", label: "Product" },
+    { key: "product", label: "Product",maxWidth: "250px",
+        render: (row) => (<Tooltip>
+            <TooltipTrigger>{row.asin}</TooltipTrigger>
+            <TooltipContent>
+                <p>{row.product}</p>
+            </TooltipContent>
+        </Tooltip>)},
   { key: "organic", label: "Organic Units" },
   { key: "ppc", label: "PPC Units" },
   { key: "total", label: "Total Units" },
 ];
 
 export default function UnitsPage() {
-  const [res, setRes] = useState(null);
-  const [loading, setLoading] = useState(true);
 
     const {data:graphData,isLoading} = useData({
         "dimensions": [
@@ -45,19 +50,29 @@ export default function UnitsPage() {
         organicUnits:item['PnlDistribution.organicUnits'],
         totalUnits:item['PnlDistribution.totalUnits'],
     })),"sellercenteroverview","PnlDistribution.report_date")
+    const {data:asisData} = useData(
+    {
+        "dimensions": [
+            "ProductStats.asin",
+            "SellerListingReports.item_name"
+        ],
+        "measures": [
+            "ProductStats.adUnits",
+            "ProductStats.organicUnits",
+            "ProductStats.units"
+        ],
+        "order": {
+            "ProductStats.sales": "desc"
+        }
+    },(data)=>data.map(item=>({
+        product:item['SellerListingReports.item_name'],
+        asin:item['ProductStats.asin'],
+        organic:item["ProductStats.organicUnits"],
+        ppc:item['ProductStats.adUnits'],
+        total:item['ProductStats.units'],
+    })),"asisData","ProductStats.report_date")
 
-  useEffect(() => {
-    const base = typeof window !== "undefined" ? window.location.origin : "";
-    fetch(`${base}/api/amazon/seller/units`)
-      .then((r) => r.json())
-      .then(setRes)
-      .catch(() => setRes({ source: "sample" }))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const source = res?.source ?? "sample";
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="grid" style={{ gap: 20 }}>
         <TabBar tabs={tabs} active="Units" />
@@ -65,10 +80,6 @@ export default function UnitsPage() {
       </div>
     );
   }
-
-  const data = res.data ?? {};
-  const series = data.series ?? [];
-  const rows = data.rows ?? [];
 
   return (
     <div className="grid" style={{ gap: 20 }}>
@@ -89,7 +100,7 @@ export default function UnitsPage() {
         }} />
       <div className="card">
         <div className="card-inner">
-          <DataTable columns={columns} rows={rows} />
+          <DataTable columns={columns} rows={asisData} />
         </div>
       </div>
     </div>
