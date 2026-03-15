@@ -22,7 +22,7 @@ export const useRequest = (payload,parser,key="data")=>{
     })
 }
 
-export const useData = (payload,parser,key="data",timeDimension=null)=>{
+export const useData = (payload,parser,key="data",timeDimension=null,granularity=true)=>{
 
     const {companyId,dateTimePeriod}=useFilters()
 
@@ -43,15 +43,18 @@ export const useData = (payload,parser,key="data",timeDimension=null)=>{
                 ],
             }
             if (timeDimension) {
+                const timeDimensionsFilter={
+                    "dimension": timeDimension,
+                    "dateRange": [
+                        dateTimePeriod.startDate.toDateString(),
+                        dateTimePeriod.endDate.toDateString()
+                    ]
+                }
+                if (granularity) {
+                    timeDimensionsFilter.granularity = 'day'
+                }
                 filters["timeDimensions"]= [
-                    {
-                        "dimension": timeDimension,
-                        "dateRange": [
-                            dateTimePeriod.startDate.toDateString(),
-                            dateTimePeriod.endDate.toDateString()
-                        ],
-                        "granularity": "day"
-                    }
+                    timeDimensionsFilter
                 ]
             }
             params.append("data", JSON.stringify({...payload,...filters}))
