@@ -1,7 +1,8 @@
+"use client";
 import TabBar from "../../../components/TabBar";
 import LineChart from "../../../components/LineChart";
 import ReportsConnectMessage from "../../../components/ReportsConnectMessage";
-import { placeholderChartSeries } from "../../../lib/sampleData";
+// import { placeholderChartSeries } from "../../../lib/sampleData";
 
 const tabs = [
   { label: "Product details", href: "/reports/product-details" },
@@ -20,7 +21,7 @@ export default function RoiPage() {
         title="ROI data unavailable"
         description="Connect the Amazon Seller Central (SP-API) to see live ROI and margin trend data here."
       />
-      <LineChart title="ROI & Margin trend" series={placeholderChartSeries} />
+      <LineChart title="ROI & Margin trend" />
     </div>
   );
 }

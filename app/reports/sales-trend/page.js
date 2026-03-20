@@ -1,6 +1,8 @@
+"use client";
+
 import AreaChart from "../../components/AreaChart";
 import ReportsConnectMessage from "../../components/ReportsConnectMessage";
-import { placeholderChartSeries } from "../../lib/sampleData";
+// import { placeholderChartSeries } from "../../lib/sampleData";
 
 const weeks = ["Summary", "Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6"];
 
@@ -11,7 +13,7 @@ export default function SalesTrendPage() {
         title="Sales trend data unavailable"
         description="Connect the Amazon Seller Central (SP-API) to see live sales trend data for this report."
       />
-      <AreaChart title="Sales trend" series={placeholderChartSeries} />
+      <AreaChart title="Sales trend" />
       <div className="card">
         <div className="card-inner">
           <div className="filter-row">

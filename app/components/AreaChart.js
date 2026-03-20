@@ -1,4 +1,7 @@
+"use client";
+
 import { makeAreaPath, makePath, normalizeSeries, generateYAxisLabels, generateXAxisLabels } from "../lib/chartUtils";
+
 import {
     ChartContainer,
     ChartLegend,

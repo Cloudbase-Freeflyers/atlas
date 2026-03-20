@@ -1,3 +1,4 @@
+"use client";
 import TabBar from "../../../components/TabBar";
 import DataTable from "../../../components/DataTable";
 import ReportsConnectMessage from "../../../components/ReportsConnectMessage";

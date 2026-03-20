@@ -1,4 +1,7 @@
+"use client";
+
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+
 import { RechartsDevtools } from '@recharts/devtools';
 
 

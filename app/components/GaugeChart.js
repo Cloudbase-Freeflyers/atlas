@@ -1,4 +1,7 @@
+"use client";
+
 import {ChartContainer} from "@/components/ui/chart.jsx";
+
 import {PolarGrid, PolarRadiusAxis, RadialBar, RadialBarChart} from "recharts";
 import {Label} from "radix-ui";
 

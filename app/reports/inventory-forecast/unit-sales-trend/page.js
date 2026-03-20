@@ -1,7 +1,7 @@
+"use client";
 import TabBar from "../../../components/TabBar";
 import LineChart from "../../../components/LineChart";
 import ReportsConnectMessage from "../../../components/ReportsConnectMessage";
-import { placeholderChartSeries } from "../../../lib/sampleData";
 
 const tabs = [
   { label: "Forecast", href: "/reports/inventory-forecast" },
@@ -19,7 +19,7 @@ export default function UnitSalesTrendPage() {
         title="Unit sales trend unavailable"
         description="Connect the Amazon Seller Central (SP-API) and inventory APIs to see live unit sales trend data here."
       />
-      <LineChart title="Unit sales trend" series={placeholderChartSeries} />
+      <LineChart title="Unit sales trend" />
     </div>
   );
 }

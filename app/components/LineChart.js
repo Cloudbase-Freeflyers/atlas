@@ -1,4 +1,7 @@
+"use client";
+
 import { makePath, normalizeSeries, generateYAxisLabels, generateXAxisLabels } from "../lib/chartUtils";
+
 import {CartesianGrid,LineChart as BaseLineChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {
     ChartContainer,
