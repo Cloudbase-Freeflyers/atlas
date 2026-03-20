@@ -104,7 +104,7 @@ export default function ReportSellerCentral() {
     tacos:item['ProductStats.tacos'],
     ads:item['ProductStats.adSales'],
     // orders:item['PnlDistribution.order'],
-  })),"asisData","ProductStats.report_date")
+  })),"asisData","ProductStats.report_date",false)
 
   if (isLoading) {
     return (

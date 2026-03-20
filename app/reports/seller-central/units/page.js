@@ -70,7 +70,7 @@ export default function UnitsPage() {
         organic:item["ProductStats.organicUnits"],
         ppc:item['ProductStats.adUnits'],
         total:item['ProductStats.units'],
-    })),"asisData","ProductStats.report_date")
+    })),"asisData","ProductStats.report_date",false)
 
   if (isLoading) {
     return (

@@ -94,7 +94,7 @@ export default function SalesDistributionPage() {
         // sessions:item['AsinPerformance.acos'],
         // tacos:item['AsinPerformance.acos'],
         ads:item['ProductStats.adSales'],
-    })),"asisData2","ProductStats.report_date")
+    })),"asisData2","ProductStats.report_date",false)
 
 
   if (isLoading) {

@@ -1,14 +1,19 @@
 import { getAdsConfig } from "../../../../lib/amazon/config.js";
 import { listCampaigns } from "../../../../lib/amazon/adsClient.js";
 import { adsMetrics, adsSeries } from "../../../../lib/sampleData.js";
-import cubeApi from "../../../../lib/cube.js";
+import createCubeApi from "../../../../lib/cube.js";
+import { cookies } from "next/headers";
 
 /**
  * GET /api/amazon/ads/overview
  * Returns ads overview metrics and series for Ads Overview report.
  * Uses Amazon Advertising API when configured; otherwise sample data.
  */
-export async function GET() {
+export async function GET(request) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth_token")?.value || "";
+  const cubeApi = createCubeApi(token);
+
   const matrices=await cubeApi.load({
     "measures": [
       "AdsCampaignReports.sales",

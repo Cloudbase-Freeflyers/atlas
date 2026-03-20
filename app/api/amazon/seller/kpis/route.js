@@ -1,14 +1,19 @@
 import { getSellerConfig } from "../../../../lib/amazon/config.js";
 import { getSellerKpis } from "../../../../lib/amazon/sellerClient.js";
 import { kpiMetrics } from "../../../../lib/sampleData.js";
-import cubeApi from "../../../../lib/cube.js";
+import createCubeApi from "../../../../lib/cube.js";
+import { cookies } from "next/headers";
 
 /**
  * GET /api/amazon/seller/kpis
  * Returns KPIs for Overall KPIs and Seller Central reports.
  * Uses live SP-API when configured; otherwise returns sample data.
  */
-export async function GET() {
+export async function GET(request) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth_token")?.value || "";
+  const cubeApi = createCubeApi(token);
+
   const measures= await cubeApi.load({
     "measures": [
       "SellerOrderReports.sale",

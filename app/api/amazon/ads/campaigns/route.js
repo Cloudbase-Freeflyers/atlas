@@ -1,7 +1,8 @@
 import { getAdsConfig } from "../../../../lib/amazon/config.js";
 import { listCampaigns, normalizeCampaignsForUi } from "../../../../lib/amazon/adsClient.js";
 import { campaignRows } from "../../../../lib/sampleData.js";
-import cubeApi from "../../../../lib/cube.js";
+import createCubeApi from "../../../../lib/cube.js";
+import { cookies } from "next/headers";
 
 /**
  * GET /api/amazon/ads/campaigns
@@ -9,6 +10,10 @@ import cubeApi from "../../../../lib/cube.js";
  * Uses Amazon Advertising API when configured; otherwise sample data.
  */
 export async function GET(request) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth_token")?.value || "";
+  const cubeApi = createCubeApi(token);
+
   const data=await cubeApi
       .load({
           "dimensions": [
