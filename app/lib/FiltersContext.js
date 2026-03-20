@@ -1,19 +1,39 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
-import { subDays } from "date-fns";
+import { createContext, useContext, useState, useEffect, Suspense } from "react";
+import { subDays, format, parseISO } from "date-fns";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 const FiltersContext = createContext();
 
-export function FiltersProvider({ children }) {
-  const [dateTimePeriod, setDateTimePeriod] = useState({
-    startDate: subDays(new Date(), 15),
-    endDate: new Date(),
-  });
-  const [companyId, setCompanyId] = useState(null);
+function FiltersInner({ children }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
-  // Sync with localStorage if needed or just keep in memory for now
-  // For now, let's keep it simple as requested.
+  const [dateTimePeriod, setDateTimePeriod] = useState(() => {
+    const start = searchParams.get("startDate");
+    const end = searchParams.get("endDate");
+    return {
+      startDate: start ? parseISO(start) : subDays(new Date(), 15),
+      endDate: end ? parseISO(end) : new Date(),
+    };
+  });
+  
+  const [companyId, setCompanyId] = useState(() => searchParams.get("companyId"));
+
+  // Sync state to URL
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (companyId) params.set("companyId", companyId);
+    if (dateTimePeriod.startDate) params.set("startDate", format(dateTimePeriod.startDate, "yyyy-MM-dd"));
+    if (dateTimePeriod.endDate) params.set("endDate", format(dateTimePeriod.endDate, "yyyy-MM-dd"));
+    
+    // Only push if changed to avoid infinite loops and unnecessary history entries
+    if (params.toString() !== searchParams.toString()) {
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+  }, [companyId, dateTimePeriod, router, pathname, searchParams]);
 
   return (
     <FiltersContext.Provider
@@ -26,6 +46,14 @@ export function FiltersProvider({ children }) {
     >
       {children}
     </FiltersContext.Provider>
+  );
+}
+
+export function FiltersProvider({ children }) {
+  return (
+    <Suspense fallback={null}>
+      <FiltersInner>{children}</FiltersInner>
+    </Suspense>
   );
 }
 

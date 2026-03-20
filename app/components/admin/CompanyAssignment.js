@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 
-export default function CompanyAssignment({ userId }) {
+export default function CompanyAssignment({ userId, allCompanies }) {
   const assignMutation = useAssignCompany();
   const removeMutation = useRemoveCompany();
   const { data: assignedCompanies, isLoading: assignedLoading } = useUserCompanies(userId);
@@ -15,10 +15,10 @@ export default function CompanyAssignment({ userId }) {
   }), []);
 
   // Fetch all available companies from Cube.js
-  const { data: allCompanies, isLoading: allLoading } = useRequest(payload, (data) => data.map(item => ({
+  const { data: availableCompanies, isLoading: allLoading } = useRequest(payload, (data) => data.map(item => ({
     name: item['Companies.name'],
     id: item['Companies.id']
-  })), "all-companies");
+  })), "all-companies", { initialData: allCompanies });
 
   const handleAssign = async (companyId) => {
     try {
@@ -84,7 +84,7 @@ export default function CompanyAssignment({ userId }) {
       <div className="tw:space-y-4">
         <h3 className="tw:text-sm tw:font-medium tw:text-zinc-400 tw:uppercase tw:tracking-wider">Available Companies</h3>
         <div className="tw:grid tw:grid-cols-2 tw:gap-3">
-          {allCompanies?.filter(c => !assignedCompanies?.some(ac => ac.id === c.id)).map(company => (
+          {availableCompanies?.filter(c => !assignedCompanies?.some(ac => ac.id === c.id)).map(company => (
             <div key={company.id} className="tw:flex tw:items-center tw:justify-between tw:p-3 tw:bg-white/5 tw:border tw:border-white/10 tw:rounded-xl hover:tw:bg-white/10 transition-all">
               <span className="tw:text-sm tw:text-zinc-300">{company.name}</span>
               <Button 

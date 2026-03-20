@@ -9,12 +9,12 @@ import {
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import {useState} from "react";
 import {TooltipProvider} from "./components/ui/tooltip";
-export function Providers({ children }) {
+export function Providers({ children, initialUser }) {
     const [queryClient] = useState(() => new QueryClient())
   return (
       <QueryClientProvider client={queryClient}>
           <TooltipProvider>
-          <AuthProvider>
+          <AuthProvider initialUser={initialUser}>
               <FiltersProvider>
                   {children}
               </FiltersProvider>

@@ -29,7 +29,7 @@ const columns = [
   { key: "ctr", label: "CTR",formatter: "percent" },
 ];
 
-export default function ReportKeywords() {
+export default function ReportKeywords({ initialData }) {
   const {data:keywords,isLoading} = useData({
     "dimensions": [
       "AdsKeywordReports.keyword_id",
@@ -57,7 +57,7 @@ export default function ReportKeywords() {
     // conversion: "0%",
     roas: item['AdsKeywordReports.roas'],
     ctr: item['AdsKeywordReports.ctr'],
-  })),"keywrds","AdsKeywordReports.report_date")
+  })),"keywrds","AdsKeywordReports.report_date", true, { initialData: initialData?.keywords })
   const {data:graphData} = useData({
     "measures": [
       "AdsCampaignReports.spend",
@@ -79,7 +79,7 @@ export default function ReportKeywords() {
       roas: item['AdsCampaignReports.roas'],
       acos: item['AdsCampaignReports.acos'],
     }
-  }),"adsGraphs","AdsCampaignReports.report_date")
+  }),"adsGraphs","AdsCampaignReports.report_date", true, { initialData: initialData?.graphData })
 
   if (isLoading) {
     return (

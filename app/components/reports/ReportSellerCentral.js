@@ -37,7 +37,7 @@ const columns = [
   { key: "conversion", label: "Conversion",formatter:"percent" },
 ];
 
-export default function ReportSellerCentral() {
+export default function ReportSellerCentral({ initialData }) {
   const {data:graphData,isLoading} = useData({
     "dimensions": [
       "PnlDistribution.report_date",
@@ -65,7 +65,7 @@ export default function ReportSellerCentral() {
     profit:item['PnlDistribution.profit'],
     totalSales:item['PnlDistribution.totalSales'],
     totalUnits:item['PnlDistribution.totalUnits'],
-  })),"sellercenteroverview","PnlDistribution.report_date")
+  })),"sellercenteroverview","PnlDistribution.report_date", true, { initialData: initialData?.graphData })
 
 
 
@@ -104,7 +104,7 @@ export default function ReportSellerCentral() {
     tacos:item['ProductStats.tacos'],
     ads:item['ProductStats.adSales'],
     // orders:item['PnlDistribution.order'],
-  })),"asisData","ProductStats.report_date",false)
+  })),"asisData","ProductStats.report_date",false, { initialData: initialData?.productData })
 
   if (isLoading) {
     return (

@@ -12,8 +12,8 @@ import {
 import { Input } from "./ui/input";
 import { useMyCompanies } from "@/hooks/useUsers";
 
-export default function CompanySelector() {
-  const { data: companies, isLoading } = useMyCompanies();
+export default function CompanySelector({ initialCompanies }) {
+  const { data: companies, isLoading } = useMyCompanies({ initialData: initialCompanies });
   const { companyId, setCompanyId } = useFilters();
   const [search, setSearch] = React.useState("");
 

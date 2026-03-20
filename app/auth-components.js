@@ -12,10 +12,10 @@ export const AuthGuard = ({ children }) => {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !user && !isAnonymous && !PUBLIC_ROUTES.includes(pathname)) {
+    if (!loading && !user && !PUBLIC_ROUTES.includes(pathname)) {
       router.push('/login');
     }
-  }, [user, loading, isAnonymous, pathname, router]);
+  }, [user, loading, pathname, router]);
 
   if (loading) {
     return (

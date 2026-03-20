@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/authContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
+import { loginAction } from '@/lib/authActions';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -21,8 +22,9 @@ export default function LoginPage() {
     const result = await login(email, password);
     if (!result.success) {
       setError(result.message);
+      setLoading(false);
     }
-    setLoading(false);
+    // Redirection is handled inside context login
   };
 
   return (

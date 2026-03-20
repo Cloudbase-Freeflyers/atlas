@@ -1,30 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getAmazonStatusAction } from "@/lib/amazonActions";
 
-export default function AmazonApiStatus() {
-  const [seller, setSeller] = useState(null);
-  const [ads, setAds] = useState(null);
+export default function AmazonApiStatus({ initialStatus }) {
+  const [seller, setSeller] = useState(initialStatus?.seller || null);
+  const [ads, setAds] = useState(initialStatus?.ads || null);
 
   useEffect(() => {
-    const base = typeof window !== "undefined" ? window.location.origin : "";
-    Promise.all([
-      fetch(`${base}/api/amazon/seller`).then((r) => r.json()),
-      fetch(`${base}/api/amazon/ads`).then((r) => r.json()).catch(() => ({ status: "not_configured" })),
-    ])
-      .then(([sellerRes, adsRes]) => {
-        setSeller(sellerRes);
-        // Treat 401 / not configured as "off" so Seller-only testing isn't noisy
-        const adsStatus = adsRes?.status === "error" && (adsRes?.error?.includes?.("401") || adsRes?.error?.includes?.("UNAUTHORIZED"))
-          ? "not_configured"
-          : adsRes?.status ?? "not_configured";
-        setAds({ ...adsRes, status: adsStatus });
-      })
-      .catch(() => {
-        setSeller({ status: "error" });
-        setAds({ status: "not_configured" });
-      });
-  }, []);
+    if (initialStatus) return; // Skip fetch if we have initial status
+
+    getAmazonStatusAction().then((status) => {
+      setSeller(status.seller);
+      setAds(status.ads);
+    }).catch(() => {
+      setSeller({ status: "error" });
+      setAds({ status: "not_configured" });
+    });
+  }, [initialStatus]);
 
   if (seller === null && ads === null) return null;
 

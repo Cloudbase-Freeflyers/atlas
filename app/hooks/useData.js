@@ -1,36 +1,31 @@
 import {useQuery} from "@tanstack/react-query"
 import {useFilters} from "@/lib/FiltersContext.js";
+import { fetchCubeAction } from "@/lib/cubeActions";
 
-
-export const useRequest = (payload,parser,key="data")=>{
+export const useRequest = (payload,parser,key="data", options = {})=>{
 
     return useQuery({
         queryKey: [key, JSON.stringify(payload)],
-        queryFn: () => {
-            const base = typeof window !== "undefined" ? window.location.origin : "";
-            const params = new URLSearchParams();
-            params.append("data", JSON.stringify(payload))
-            return fetch(`${base}/api/graph?${params}`)
-                .then((r) => r.json())
-                .then(res => {
-                    if (parser) {
-                        return parser(res)
-                    }
-                    return res
-                })
-        }
+        queryFn: async () => {
+            const result = await fetchCubeAction(payload);
+            if (!result.success) throw new Error(result.message);
+            const res = result.data;
+            if (parser) {
+                return parser(res)
+            }
+            return res
+        },
+        ...options
     })
 }
 
-export const useData = (payload,parser,key="data",timeDimension=null,granularity=true)=>{
+export const useData = (payload,parser,key="data",timeDimension=null,granularity=true, options = {})=>{
 
     const {companyId,dateTimePeriod}=useFilters()
 
     return useQuery({
-        queryKey: [key,companyId, JSON.stringify(payload)],
-        queryFn: () => {
-            const base = typeof window !== "undefined" ? window.location.origin : "";
-            const params = new URLSearchParams();
+        queryKey: [key, companyId, dateTimePeriod, JSON.stringify(payload)],
+        queryFn: async () => {
             const filters = {
                 "filters": [
                     {
@@ -57,15 +52,18 @@ export const useData = (payload,parser,key="data",timeDimension=null,granularity
                     timeDimensionsFilter
                 ]
             }
-            params.append("data", JSON.stringify({...payload,...filters}))
-            return fetch(`${base}/api/graph?${params}`)
-                .then((r) => r.json())
-                .then(res => {
-                    if (parser) {
-                        return parser(res)
-                    }
-                    return res
-                })
-        }
+            
+            const fullPayload = {...payload,...filters};
+            const result = await fetchCubeAction(fullPayload);
+            if (!result.success) throw new Error(result.message);
+            const res = result.data;
+            
+            if (parser) {
+                return parser(res)
+            }
+            return res
+        },
+        initialData: options.initialData,
+        staleTime: options.initialData ? 1000 * 60 * 5 : 0, // 5 minutes if initialData provided
     })
 }

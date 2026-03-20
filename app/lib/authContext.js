@@ -2,23 +2,21 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import Cookies from 'js-cookie';
-import api from './api';
 import { useRouter, usePathname } from 'next/navigation';
+import { loginAction, signupAction, logoutAction, getMeAction } from './authActions';
 
 const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isAnonymous, setIsAnonymous] = useState(false);
+export const AuthProvider = ({ children, initialUser }) => {
+  const [user, setUser] = useState(initialUser || null);
+  const [loading, setLoading] = useState(initialUser === undefined);
+  const isAnonymous = user?.email === 'Anonymous';
   const router = useRouter();
   const pathname = usePathname();
 
-  const logout = useCallback(() => {
-    Cookies.remove('auth_token');
-    Cookies.remove('shareable_token');
+  const logout = useCallback(async () => {
+    await logoutAction();
     setUser(null);
-    setIsAnonymous(false);
     router.push('/login');
   }, [router]);
 
@@ -28,16 +26,18 @@ export const AuthProvider = ({ children }) => {
 
     if (!token && !sToken) {
       setUser(null);
-      setIsAnonymous(false);
       setLoading(false);
       return;
     }
 
     if (token) {
       try {
-        const response = await api.get('/auth/me');
-        setUser(response.data);
-        setIsAnonymous(false);
+        const userData = await getMeAction();
+        if (userData) {
+          setUser(userData);
+        } else {
+          logout();
+        }
       } catch (error) {
         console.error('Failed to fetch user:', error);
         logout();
@@ -45,7 +45,6 @@ export const AuthProvider = ({ children }) => {
     } else if (sToken) {
       // Logic for shareable token (anonymous)
       setUser({ email: 'Anonymous', role: 'customer' }); // Mock user for anonymous
-      setIsAnonymous(true);
     }
     
     setLoading(false);
@@ -59,47 +58,35 @@ export const AuthProvider = ({ children }) => {
       Cookies.set('shareable_token', urlToken, { expires: 7 });
     }
 
-    checkUser();
-  }, [checkUser]);
+    // If initialUser was not provided, check user status
+    if (initialUser === undefined) {
+      checkUser();
+    }
+  }, [checkUser, initialUser]);
 
   const login = async (username, password) => {
-    const params = new URLSearchParams();
-    params.append('username', username);
-    params.append('password', password);
-
-    try {
-      const response = await api.post('/auth/login', params, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      });
-      const { access_token } = response.data;
-      Cookies.set('auth_token', access_token, { expires: 7 }); // Set cookie for 7 days
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("password", password);
+    
+    const result = await loginAction(formData);
+    if (result.success) {
       await checkUser();
       router.push('/reports');
-      return { success: true };
-    } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.detail || 'Login failed' 
-      };
     }
+    return result;
   };
 
   const signup = async (email, password) => {
-    try {
-      await api.post('/users/', { email, password, role: 'customer' });
-      return { success: true };
-    } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.detail || 'Signup failed' 
-      };
-    }
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
+    
+    return await signupAction(formData);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, signup, isAnonymous }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, signup, isAnonymous, checkUser }}>
       {children}
     </AuthContext.Provider>
   );

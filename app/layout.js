@@ -1,8 +1,11 @@
 import { Providers } from "./Providers"
 import { AuthGuard, Navigation } from "./auth-components"
+import { getServerUser } from "./lib/serverApi"
 import "./tailwind.css"
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+    const initialUser = await getServerUser();
+
     return (
         <html lang="en">
             <head>
@@ -22,7 +25,7 @@ export default function RootLayout({ children }) {
                 />
             </head>
             <body className={"dark"}>
-                <Providers>
+                <Providers initialUser={initialUser}>
                     <AuthGuard>
                         <Navigation />
                         <div className="tw:mt-[92px]">

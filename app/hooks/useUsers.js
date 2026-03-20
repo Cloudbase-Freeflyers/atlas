@@ -1,13 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { 
+  createUserAction, 
+  assignCompanyAction, 
+  removeCompanyAction,
+  getUserCompaniesAction,
+  getUsersAction,
+  getMyCompaniesAction
+} from '@/lib/adminActions';
 
-export const useUsers = () => {
+export const useUsers = (options = {}) => {
   return useQuery({
     queryKey: ['users'],
     queryFn: async () => {
-      const response = await api.get('/users/');
-      return response.data;
+      return await getUsersAction();
     },
+    ...options
   });
 };
 
@@ -15,8 +22,9 @@ export const useCreateUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (userData) => {
-      const response = await api.post('/users/', userData);
-      return response.data;
+      const result = await createUserAction(userData);
+      if (!result.success) throw new Error(result.message);
+      return result.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -28,8 +36,9 @@ export const useAssignCompany = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ userId, companyId }) => {
-      const response = await api.post(`/users/${userId}/companies/${companyId}`);
-      return response.data;
+      const result = await assignCompanyAction(userId, companyId);
+      if (!result.success) throw new Error(result.message);
+      return result.data;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -42,8 +51,9 @@ export const useRemoveCompany = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ userId, companyId }) => {
-      const response = await api.delete(`/users/${userId}/companies/${companyId}`);
-      return response.data;
+      const result = await removeCompanyAction(userId, companyId);
+      if (!result.success) throw new Error(result.message);
+      return result.data;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -52,24 +62,24 @@ export const useRemoveCompany = () => {
   });
 };
 
-export const useMyCompanies = () => {
+export const useMyCompanies = (options = {}) => {
   return useQuery({
     queryKey: ['my-companies'],
     queryFn: async () => {
-      const response = await api.get('/users/me/companies');
-      return response.data;
+      return await getMyCompaniesAction();
     },
+    ...options,
   });
 };
 
-export const useUserCompanies = (userId) => {
+export const useUserCompanies = (userId, options = {}) => {
   return useQuery({
     queryKey: ['user-companies', userId],
     queryFn: async () => {
       if (!userId) return [];
-      const response = await api.get(`/users/${userId}/companies`);
-      return response.data;
+      return await getUserCompaniesAction(userId);
     },
     enabled: !!userId,
+    ...options
   });
 };

@@ -31,7 +31,7 @@ const columns = [
 ];
 
 
-export default function ReportCampaigns() {
+export default function ReportCampaigns({ initialData }) {
   const {data:campaigns,isLoading} = useData({
     "dimensions": [
       "AdsCampaignReports.campaign_name",
@@ -60,7 +60,7 @@ export default function ReportCampaigns() {
     roas: item['AdsCampaignReports.roas'],
     ctr: item['AdsCampaignReports.ctr'],
     acos: item['AdsCampaignReports.acos'],
-  })),"campaigns")
+  })),"campaigns",null,true,{ initialData: initialData?.campaigns })
   const {data:graphData} = useData({
     "measures": [
       "AdsCampaignReports.spend",
@@ -82,7 +82,7 @@ export default function ReportCampaigns() {
       roas: item['AdsCampaignReports.roas'],
       acos: item['AdsCampaignReports.acos'],
     }
-  }),"adsGraphs","AdsCampaignReports.report_date")
+  }),"adsGraphs","AdsCampaignReports.report_date", true, { initialData: initialData?.graphData })
 
 
   if (isLoading) {

@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useAuth } from '@/lib/authContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { signupAction } from '@/lib/authActions';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -13,7 +13,6 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signup } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -27,13 +26,17 @@ export default function SignupPage() {
 
     setLoading(true);
 
-    const result = await signup(email, password);
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
+
+    const result = await signupAction(formData);
     if (result.success) {
       router.push('/login?signup=success');
     } else {
       setError(result.message);
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

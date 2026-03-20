@@ -1,4 +1,7 @@
-export default function HomePage() {
+import { requireServerAuth } from "./lib/serverApi";
+
+export default async function HomePage() {
+    await requireServerAuth();
     return (
         <>
             {/* Hero Section */}

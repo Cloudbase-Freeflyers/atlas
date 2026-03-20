@@ -18,7 +18,7 @@ const tabs = [
   { label: "Campaigns", href: "/reports/campaigns" },
 ];
 
-export default function ReportOverallKpis() {
+export default function ReportOverallKpis({ initialData }) {
   const [res, setRes] = useState(null);
   const [loading, setLoading] = useState(true);
     const {data} = useData({
@@ -50,7 +50,7 @@ export default function ReportOverallKpis() {
             roas: item['AdsCampaignReports.roas'],
             acos: item['AdsCampaignReports.acos'],
         }
-    }),"overadskpigraph","AdsCampaignReports.report_date")
+    }),"overadskpigraph","AdsCampaignReports.report_date", true, { initialData: initialData?.graphData })
 
     const {data:salesKpis,isLoading:isLoadingSaleKpis} = useData({
         "measures": [
@@ -64,7 +64,9 @@ export default function ReportOverallKpis() {
             formatter:"compact"
         },
         { label: "Total Sales ($)", value: item['SellerOrderReports.sale'],formatter:"currency" },
-    ])),"saleoverallkips","SellerOrderReports.purchase_date")
+    ])),"saleoverallkips","SellerOrderReports.purchase_date", true, { 
+        initialData: initialData?.kpis ? [initialData.kpis.filter(k => k.label.includes("Total Orders") || k.label.includes("Total Sales"))] : undefined 
+    })
     const {data:adsKpis,isLoading:isLoadingAdsKips} = useData({
         "measures": [
             "AdsCampaignReports.spend",
@@ -81,7 +83,9 @@ export default function ReportOverallKpis() {
         { label: "Total Ad Orders", value: item['AdsCampaignReports.purchases14d'],formatter:"compact" },
         { label: "Total ROAS", value: item['AdsCampaignReports.acos'],formatter: "percent" },
         { label: "Total ACOS", value: item['AdsCampaignReports.roas'],formatter:"percent" },
-    ])),"adsoverallkips","AdsCampaignReports.report_date")
+    ])),"adsoverallkips","AdsCampaignReports.report_date", true, {
+        initialData: initialData?.kpis ? [initialData.kpis.filter(k => k.label.includes("Amount Spent") || k.label.includes("Total Ad Orders") || k.label.includes("Total ROAS") || k.label.includes("Total ACOS"))] : undefined
+    })
 
   const isLoading=useMemo(()=>isLoadingAdsKips||isLoadingSaleKpis,[isLoadingAdsKips,isLoadingSaleKpis])
     const kpis= useMemo(()=>{

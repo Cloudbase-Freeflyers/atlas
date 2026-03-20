@@ -4,12 +4,11 @@ import { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useFilters } from "../lib/FiltersContext";
-import { useAuth } from "../lib/authContext";
 import CompanySelector from "./CompanySelector";
 import DateRangePicker from "./DateRangePicker";
 import {Button} from "../components/ui/button.jsx";
 
-export default function TopBar() {
+export default function TopBar({ initialCompanies }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { companyId, setCompanyId } = useFilters();
@@ -38,7 +37,7 @@ export default function TopBar() {
     <header className="topbar tw:pb-4 tw:pt-2">
       <div className="topbar-inner">
         <div className="tw:flex">
-          <CompanySelector />
+          <CompanySelector initialCompanies={initialCompanies} />
           <div className="tw:flex-1"></div>
           <DateRangePicker />
           <Button >

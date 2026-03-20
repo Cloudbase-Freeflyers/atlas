@@ -30,7 +30,7 @@ import {
 
 import { useCreateUser } from '@/hooks/useUsers';
 
-export default function UserModal({ user, onClose }) {
+export default function UserModal({ user, onClose, allCompanies }) {
   const [email, setEmail] = useState(user?.email || '');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState(user?.role || 'customer');
@@ -166,7 +166,7 @@ export default function UserModal({ user, onClose }) {
 
           {user && (
               <TabsContent value="companies" className="tw:mt-0">
-                <CompanyAssignment userId={user?.id} />
+                <CompanyAssignment userId={user?.id} allCompanies={allCompanies} />
               </TabsContent>
           )}
         </Tabs>

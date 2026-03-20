@@ -18,7 +18,7 @@ const tabs = [
   { label: "Campaigns", href: "/reports/campaigns" },
 ];
 
-export default function ReportAdsOverview() {
+export default function ReportAdsOverview({ initialData }) {
   const {data} = useData({
         "measures": [
             "AdsCampaignReports.spend",
@@ -42,7 +42,7 @@ export default function ReportAdsOverview() {
             roas: item['AdsCampaignReports.roas'],
             acos: item['AdsCampaignReports.acos'],
         }
-    }),"adsoverviewbydate","AdsCampaignReports.report_date")
+    }),"adsoverviewbydate","AdsCampaignReports.report_date", true, { initialData: initialData?.graphData })
 
     const {data:metrics,isLoading} = useData({
         "measures": [
@@ -91,10 +91,10 @@ export default function ReportAdsOverview() {
                 formatter:"percent"
             },{
                 label: "CTR",value:item['AdsCampaignReports.ctr'],formatter:"percent"
-            },{label: "Conversion Rate",value:'-',formatter:(v)=>v
+            },{label: "Conversion Rate",value:'-',formatter:"default"
             }
         ]
-    }),"adsoverview","AdsCampaignReports.report_date")
+    }),"adsoverview","AdsCampaignReports.report_date", true, { initialData: initialData?.metrics ? [initialData.metrics] : undefined })
 
 
     if (isLoading) {
