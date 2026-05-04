@@ -15,10 +15,12 @@ export default async function ReportsLayout({ children }) {
   return (
     <>
       <div className="app-shell">
-        <main className="app-content">
+        <main className="app-content tw:min-w-0">
           <TopBar initialCompanies={companies} />
           <AmazonApiStatus initialStatus={amazonStatus} />
-          <div className="container">{children}</div>
+          <div className="container tw:min-w-0 tw:w-full tw:max-w-full">
+            {children}
+          </div>
         </main>
       </div>
     </>

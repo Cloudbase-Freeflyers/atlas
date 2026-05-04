@@ -230,6 +230,30 @@ body {
     padding: var(--spacing-4xl) 0;
 }
 
+@media (max-width: 768px) {
+    .reports-hero {
+        padding: 96px 0 48px;
+    }
+
+    .reports-section {
+        padding: var(--spacing-2xl) 0 var(--spacing-3xl);
+    }
+}
+
+@media (max-width: 480px) {
+    .reports-hero {
+        padding: 88px 0 40px;
+    }
+
+    .reports-hero-grid {
+        gap: var(--spacing-lg);
+    }
+
+    .grid-auto {
+        grid-template-columns: 1fr;
+    }
+}
+
 .grid {
     display: grid;
     gap: var(--spacing-xl);
@@ -1765,16 +1789,50 @@ textarea.form-input {
 }
 
 /* ===== Tab Bar Styles ===== */
+.tabbar-wrap {
+  margin-bottom: 18px;
+  border-bottom: 2px solid #2a2a2a;
+  padding-bottom: 0;
+}
+
 .tabbar {
   display: flex;
   align-items: center;
-  gap: 24px;
-  border-bottom: 2px solid #2a2a2a;
+  flex-wrap: wrap;
+  gap: clamp(10px, 2vw, 24px);
+  row-gap: 10px;
   padding-bottom: 12px;
   margin-bottom: 0;
   font-size: 14px;
-  overflow-x: auto;
-  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .tabbar-wrap {
+    margin-left: -4px;
+    margin-right: -4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    overscroll-behavior-x: contain;
+  }
+
+  .tabbar-wrap .tabbar {
+    flex-wrap: nowrap;
+    gap: 16px;
+    padding-bottom: 12px;
+    min-height: 44px;
+  }
+
+  .tabbar-wrap .tabbar button,
+  .tabbar-wrap .tabbar a {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 8px 2px 12px;
+    margin-bottom: -14px;
+  }
 }
 
 .tabbar button,
@@ -2039,4 +2097,24 @@ textarea.form-input {
 
 .chart-frame svg path[stroke] {
   transition: stroke-width 150ms ease;
+}
+
+/* Recharts line charts: global path glow clips badly; axes use .recharts-* not .y-axis */
+.chart-frame.chart-frame--recharts svg path.recharts-curve {
+  filter: none;
+  stroke-width: 2;
+}
+
+.chart-frame.chart-frame--recharts .recharts-cartesian-grid line,
+.chart-frame.chart-frame--recharts .recharts-cartesian-grid path {
+  filter: none;
+}
+
+.chart-frame.chart-frame--recharts .recharts-cartesian-axis-tick text {
+  fill: #a3a3a3;
+  font-size: 11px;
+}
+
+.chart-frame.chart-frame--recharts .recharts-cartesian-axis-tick tspan {
+  fill: inherit;
 }

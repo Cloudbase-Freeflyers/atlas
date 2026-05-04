@@ -40,6 +40,7 @@ import {
   SelectValue,
 } from "./ui/select"
 import {formatValue} from "../lib/formatters.js";
+import { cn } from "../lib/utils";
 
 export default function DataTable({ 
   columns: initialColumns, 
@@ -47,7 +48,10 @@ export default function DataTable({
   allowPagination = true, 
   columnSelection = true, 
   searchKey = null,
-  defaultMaxWidth = "auto"
+  defaultMaxWidth = "auto",
+  initialPageSize = 100,
+  pageSizeOptions = [100, 200, 300, 400, 500],
+  horizontalScroll = false,
 }) {
   
   // Helper for formatting values
@@ -100,7 +104,7 @@ export default function DataTable({
   const [rowSelection, setRowSelection] = React.useState({})
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 100,
+    pageSize: initialPageSize,
   })
 
   const table = useReactTable({
@@ -125,9 +129,9 @@ export default function DataTable({
   })
 
   return (
-    <div className="tw:w-full tw:space-y-4">
-      <div className="tw:flex tw:items-center tw:justify-between tw:gap-4">
-        <div className="tw:flex tw:flex-1 tw:items-center tw:gap-2">
+    <div className="tw:w-full tw:min-w-0 tw:max-w-full tw:space-y-4">
+      <div className="tw:flex tw:flex-col tw:gap-3 sm:tw:flex-row sm:tw:items-center sm:tw:justify-between sm:tw:gap-4">
+        <div className="tw:flex tw:min-w-0 tw:flex-1 tw:flex-wrap tw:items-center tw:gap-2">
           {searchKey && (
             <Input
               placeholder={`Filter ${searchKey}...`}
@@ -139,7 +143,7 @@ export default function DataTable({
             />
           )}
         </div>
-        <div className="tw:flex tw:items-center tw:gap-2">
+        <div className="tw:flex tw:w-full tw:shrink-0 tw:items-center tw:gap-2 sm:tw:w-auto">
           {columnSelection && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -171,7 +175,12 @@ export default function DataTable({
           )}
         </div>
       </div>
-      <div className="tw:rounded-md tw:border tw:bg-card tw:max-h-[600px] tw:overflow-y-auto">
+      <div
+        className={cn(
+          "tw:rounded-md tw:border tw:bg-card tw:max-h-[min(600px,70vh)] tw:max-w-full tw:overflow-x-auto tw:overflow-y-auto",
+          horizontalScroll && "tw:overscroll-x-contain"
+        )}
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -237,13 +246,19 @@ export default function DataTable({
       </div>
 
       {allowPagination && (
-        <div className="tw:flex tw:items-center tw:justify-between tw:px-2">
-          <div className="tw:flex-1 tw:text-sm tw:text-muted-foreground">
-            {/*{table.getFilteredSelectedRowModel().rows.length} of{" "}*/}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
+        <div className="tw:flex tw:flex-col tw:gap-4 tw:px-2 sm:tw:flex-row sm:tw:items-center sm:tw:justify-between">
+          <div className="tw:text-sm tw:text-muted-foreground sm:tw:flex-1">
+            {(() => {
+              const total = table.getFilteredRowModel().rows.length;
+              const { pageIndex, pageSize } = table.getState().pagination;
+              if (total === 0) return "0 items";
+              const from = pageIndex * pageSize + 1;
+              const to = Math.min((pageIndex + 1) * pageSize, total);
+              return `Items ${from} to ${to} of ${total}`;
+            })()}
           </div>
-          <div className="tw:flex tw:items-center tw:space-x-6 lg:tw:space-x-8">
-            <div className="tw:flex tw:items-center tw:space-x-2">
+          <div className="tw:flex tw:flex-col tw:gap-3 sm:tw:flex-row sm:tw:items-center sm:tw:space-x-6 lg:tw:space-x-8">
+            <div className="tw:flex tw:items-center tw:gap-2 tw:space-x-0">
               <p className="tw:text-sm tw:font-medium">Rows per page</p>
               <Select
                 value={`${table.getState().pagination.pageSize}`}
@@ -255,7 +270,7 @@ export default function DataTable({
                   <SelectValue placeholder={table.getState().pagination.pageSize} />
                 </SelectTrigger>
                 <SelectContent align="end">
-                  {[100, 200, 300, 400, 500].map((pageSize) => (
+                  {pageSizeOptions.map((pageSize) => (
                     <SelectItem key={pageSize} value={`${pageSize}`}>
                       {pageSize}
                     </SelectItem>

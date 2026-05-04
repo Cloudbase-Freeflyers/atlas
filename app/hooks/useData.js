@@ -24,8 +24,16 @@ export const useData = (payload,parser,key="data",timeDimension=null,granularity
     const {companyId,dateTimePeriod}=useFilters()
 
     return useQuery({
-        queryKey: [key, companyId, dateTimePeriod, JSON.stringify(payload)],
+        queryKey: [
+            key,
+            companyId,
+            dateTimePeriod,
+            JSON.stringify(options.timeDimensionDateRange ?? null),
+            JSON.stringify(payload),
+        ],
         queryFn: async () => {
+            const extraFilters = Array.isArray(payload.filters) ? payload.filters : [];
+            const { filters: _payloadFilters, ...payloadRest } = payload;
             const filters = {
                 "filters": [
                     {
@@ -34,26 +42,35 @@ export const useData = (payload,parser,key="data",timeDimension=null,granularity
                         "values": [
                             companyId
                         ]
-                    }
+                    },
+                    ...extraFilters,
                 ],
             }
             if (timeDimension) {
+                const dr = options.timeDimensionDateRange;
+                const rangeStart =
+                    dr?.[0] ?? dateTimePeriod.startDate.toDateString();
+                const rangeEnd =
+                    dr?.[1] ?? dateTimePeriod.endDate.toDateString();
                 const timeDimensionsFilter={
                     "dimension": timeDimension,
-                    "dateRange": [
-                        dateTimePeriod.startDate.toDateString(),
-                        dateTimePeriod.endDate.toDateString()
-                    ]
+                    "dateRange": [rangeStart, rangeEnd]
                 }
-                if (granularity) {
-                    timeDimensionsFilter.granularity = 'day'
+                const g =
+                    options.timeGranularity !== undefined
+                        ? options.timeGranularity
+                        : granularity
+                          ? "day"
+                          : undefined;
+                if (g) {
+                    timeDimensionsFilter.granularity = g;
                 }
                 filters["timeDimensions"]= [
                     timeDimensionsFilter
                 ]
             }
             
-            const fullPayload = {...payload,...filters};
+            const fullPayload = {...payloadRest,...filters};
             const result = await fetchCubeAction(fullPayload);
             if (!result.success) throw new Error(result.message);
             const res = result.data;
@@ -65,5 +82,7 @@ export const useData = (payload,parser,key="data",timeDimension=null,granularity
         },
         initialData: options.initialData,
         staleTime: options.initialData ? 1000 * 60 * 5 : 0, // 5 minutes if initialData provided
+        enabled:
+          (options.enabled !== undefined ? options.enabled : true) && !!companyId,
     })
 }

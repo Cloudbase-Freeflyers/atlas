@@ -45,11 +45,13 @@ export default function PPCPage() {
                 key:'cost',
                 label: "PPC Spend",
                 color: "#98f06c",
+                formatter: "currency",
             },
             sales:{
-                key:'sale',
+                key:'sales',
                 label: "Sales",
                 color: "#f0e96c",
+                formatter: "currency",
             },
         }} />
     </div>

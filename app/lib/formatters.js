@@ -20,6 +20,36 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
     compactDisplay: "short",
     maximumFractionDigits: 1,
 })
+
+/** Shorter currency ticks for chart Y-axes (avoids clipping long labels). */
+const axisCurrencyCompact = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    notation: "compact",
+    maximumFractionDigits: 1,
+})
+
+/**
+ * @param {number} value
+ * @param {string} [formatter] currency | percent | compact | decimal | default
+ */
+export function formatAxisTick(value, formatter) {
+    if (value === null || value === undefined || Number.isNaN(Number(value))) return ""
+    const n = Number(value)
+    switch (formatter) {
+        case "currency":
+            return axisCurrencyCompact.format(n)
+        case "percent":
+            return percentFormatter.format(n / 100)
+        case "compact":
+            return compactFormatter.format(n)
+        case "decimal":
+            return decimalFormatter.format(n)
+        default:
+            return compactFormatter.format(n)
+    }
+}
+
 export const formatValue = (value, formatter) => {
     if (value === null || value === undefined) return ""
 

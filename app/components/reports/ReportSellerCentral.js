@@ -137,16 +137,37 @@ export default function ReportSellerCentral({ initialData }) {
           color: "#6cf096",
         }
       }} />
+      <LineChart
+        title="Ad sales vs organic sales"
+        xKey={"date"}
+        data={graphData}
+        config={{
+          adSales: {
+            key: "adSales",
+            label: "Ad sales",
+            color: "#ac6cf0",
+            formatter: "currency",
+          },
+          organicSales: {
+            key: "organicSales",
+            label: "Organic sales",
+            color: "#6cf096",
+            formatter: "currency",
+          },
+        }}
+      />
       <LineChart title="Units: Organic vs PPC" xKey={'date'} data={graphData} config={{
         organicUnits:{
           key:'organicUnits',
           label: "Organic Units",
           color: "#98f06c",
+          formatter: "compact",
         },
         adUnits:{
           key:'adUnits',
           label: "Ad Units",
           color: "#f0e96c",
+          formatter: "compact",
         },
       }} />
       {/*{organicSeries.length > 0 && <LineChart title="Units: Organic vs PPC" series={organicSeries} />}*/}

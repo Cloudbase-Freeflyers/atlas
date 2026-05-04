@@ -15,6 +15,15 @@ import {
 
 export default function DateRangePicker({ className }) {
   const { dateTimePeriod, setDateTimePeriod } = useFilters();
+  const [monthCount, setMonthCount] = React.useState(1);
+
+  React.useEffect(() => {
+    const mq = window.matchMedia("(min-width: 640px)");
+    const apply = () => setMonthCount(mq.matches ? 2 : 1);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
 
   return (
     <div className={cn("tw:grid tw:gap-2", className)}>
@@ -24,7 +33,7 @@ export default function DateRangePicker({ className }) {
             id="date"
             variant={"outline"}
             className={cn(
-              "tw:w-[260px] tw:justify-start tw:text-left tw:font-normal tw:h-9 tw:bg-white/10 tw:border-white/20 tw:text-white tw:hover:bg-white/20",
+              "tw:min-w-0 tw:w-full tw:max-w-[min(100%,260px)] sm:tw:w-[260px] sm:tw:max-w-none tw:justify-start tw:text-left tw:font-normal tw:h-9 tw:bg-white/10 tw:border-white/20 tw:text-white tw:hover:bg-white/20",
               !dateTimePeriod && "tw:text-muted-foreground"
             )}
           >
@@ -43,7 +52,11 @@ export default function DateRangePicker({ className }) {
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="tw:w-auto tw:p-0" align="end">
+        <PopoverContent
+          className="tw:w-auto tw:max-w-[calc(100vw-24px)] tw:p-0"
+          align="end"
+          sideOffset={6}
+        >
           <Calendar
             initialFocus
             mode="range"
@@ -58,7 +71,7 @@ export default function DateRangePicker({ className }) {
                 endDate: range?.to,
               });
             }}
-            numberOfMonths={2}
+            numberOfMonths={monthCount}
           />
         </PopoverContent>
       </Popover>

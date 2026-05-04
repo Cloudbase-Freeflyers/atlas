@@ -1,8 +1,7 @@
 import ReportAdminUsers from "@/components/admin/ReportAdminUsers";
-import { getServerUsers, getServerAllCompanies, requireServerAuth } from "@/lib/serverApi";
+import { getServerUsers, getServerAllCompanies } from "@/lib/serverApi";
 
 export default async function AdminUsersPage() {
-  await requireServerAuth();
   const [users, allCompanies] = await Promise.all([
     getServerUsers(),
     getServerAllCompanies()

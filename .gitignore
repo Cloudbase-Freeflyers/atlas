@@ -19,6 +19,9 @@
 .env
 .env*.local
 
+# local client accounts store (see docs/handoff/admin-clients.md)
+/data
+
 # vercel
 .vercel
 

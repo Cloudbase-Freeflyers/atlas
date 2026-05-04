@@ -42,8 +42,8 @@ export async function GET(request) {
       return [
         { label: "Amount Spent ($)", value: parseFloat(item['AdsCampaignReports.spend']).toFixed(2) },
         { label: "Total Ad Orders", value: parseFloat(item['AdsCampaignReports.purchases14d']).toFixed(2) },
-        { label: "Total ROAS", value: parseFloat(item['AdsCampaignReports.acos']).toFixed(2) },
-        { label: "Total ACOS", value: parseFloat(item['AdsCampaignReports.roas']).toFixed(2) },
+        { label: "Total ACOS", value: parseFloat(item['AdsCampaignReports.acos']).toFixed(2) },
+        { label: "Total ROAS", value: parseFloat(item['AdsCampaignReports.roas']).toFixed(2) },
       ]
     });
     return data[0]

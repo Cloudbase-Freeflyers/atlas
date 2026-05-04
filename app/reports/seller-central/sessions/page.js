@@ -29,7 +29,8 @@ export default function SessionsPage() {
   const {data,isLoading} = useData({
     "measures": [
       "SellerSalesTrafficReports.sessions",
-      "SellerSalesTrafficReports.unit_session_percentage"
+      "SellerSalesTrafficReports.unit_session_percentage",
+      "SellerSalesTrafficReports.page_views",
     ],
     "dimensions": [
       "SellerSalesTrafficReports.report_date"
@@ -41,6 +42,7 @@ export default function SessionsPage() {
     date: new Date(item['SellerSalesTrafficReports.report_date']).toLocaleDateString(),
       sessions:item['SellerSalesTrafficReports.sessions'],
     unit_session_percentage:item['SellerSalesTrafficReports.unit_session_percentage'],
+    page_views: item['SellerSalesTrafficReports.page_views'],
   })),'sessiongraph','SellerSalesTrafficReports.report_date')
 
 
@@ -68,7 +70,7 @@ export default function SessionsPage() {
   if (isLoading) {
     return (
         <div className="grid" style={{ gap: 20 }}>
-          <TabBar tabs={tabs} active="Units" />
+          <TabBar tabs={tabs} active="Sessions" />
           <div className="card"><div className="card-inner"><p className="reports-loading">Loading…</p></div></div>
         </div>
     );
@@ -77,18 +79,36 @@ export default function SessionsPage() {
     <div className="grid" style={{ gap: 20 }}>
       <TabBar tabs={tabs} active="Sessions" />
       <p className="reports-api-badge" aria-hidden>Live data from Amazon Seller Central</p>
-      <LineChart title="Sessions + Unit Session %" xKey={'date'} data={data} config={{
-        unit_session_percentage:{
-          key:'unit_session_percentage',
-          label: "Unit Session %",
-          color: "#98f06c",
-        },
-        sessions:{
-          key:'sessions',
-          label: "Sessions",
-          color: "#f0e96c",
-        },
-      }} />
+      <div className={"tw:grid tw:grid-cols-2 tw:gap-2"}>
+        <LineChart title="Sessions + Unit Session %" xKey={'date'} data={data} config={{
+          unit_session_percentage:{
+            key:'unit_session_percentage',
+            label: "Unit Session %",
+            color: "#98f06c",
+            formatter: "percent",
+          },
+          sessions:{
+            key:'sessions',
+            label: "Sessions",
+            color: "#f0e96c",
+            formatter: "compact",
+          },
+        }} />
+        <LineChart title="Sessions + Page views" xKey={'date'} data={data} config={{
+          sessions:{
+            key:'sessions',
+            label: "Sessions",
+            color: "#f0e96c",
+            formatter: "compact",
+          },
+          pageViews:{
+            key:'page_views',
+            label: "Page views",
+            color: "#6caaf0",
+            formatter: "compact",
+          },
+        }} />
+      </div>
       <div className="card">
         <div className="card-inner">
           <DataTable columns={columns} rows={tableData} />

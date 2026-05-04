@@ -387,14 +387,50 @@ select {
   transform: translateY(-1px);
 }
 
+.tabbar-wrap {
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--c-border);
+  padding-bottom: 0;
+}
+
 .tabbar {
   display: flex;
   align-items: center;
-  gap: 20px;
-  border-bottom: 1px solid var(--c-border);
+  flex-wrap: wrap;
+  gap: clamp(8px, 2vw, 20px);
+  row-gap: 10px;
   padding-bottom: 8px;
-  margin-bottom: 18px;
   font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .tabbar-wrap {
+    margin-left: -4px;
+    margin-right: -4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    overscroll-behavior-x: contain;
+  }
+
+  .tabbar-wrap .tabbar {
+    flex-wrap: nowrap;
+    gap: 14px;
+    padding-bottom: 10px;
+    min-height: 44px;
+    align-items: stretch;
+  }
+
+  .tabbar-wrap .tabbar a,
+  .tabbar-wrap .tabbar button {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 8px 2px 10px;
+    border-bottom-width: 2px;
+  }
 }
 
 .tabbar button {
@@ -651,6 +687,25 @@ select {
 .heat-4 {
   background: #ffa3b0;
   color: #7b0c20;
+}
+
+.trend-summary-cell {
+  background: #fff9e6;
+  font-weight: 600;
+}
+
+th.trend-summary-cell {
+  background: #fff4cc;
+}
+
+.trend-sparkline-cell {
+  width: 92px;
+  vertical-align: middle;
+}
+
+.trend-sparkline-svg {
+  display: block;
+  margin: 0 auto;
 }
 
 .kpi-strip {

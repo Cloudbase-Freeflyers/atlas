@@ -18,13 +18,35 @@ const tabs = [
 ];
 
 const columns = [
-    { key: "product", label: "Product",maxWidth: "250px",
-        render: (row) => (<Tooltip>
-            <TooltipTrigger>{row.asin}</TooltipTrigger>
-            <TooltipContent>
-                <p>{row.product}</p>
-            </TooltipContent>
-        </Tooltip>)},
+  {
+    key: "product",
+    label: "Product",
+    maxWidth: "320px",
+    render: (row) => (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="tw:max-w-[min(320px,40vw)] tw:cursor-default tw:text-left">
+            <div className="tw:line-clamp-2 tw:font-medium tw:text-foreground">
+              {row.product?.trim() ? row.product : "—"}
+            </div>
+            {row.asin ? (
+              <div className="tw:mt-0.5 tw:font-mono tw:text-[11px] tw:text-muted-foreground">
+                {row.asin}
+              </div>
+            ) : null}
+          </div>
+        </TooltipTrigger>
+        <TooltipContent className="tw:max-w-sm">
+          <p className="tw:font-medium">{row.product || "—"}</p>
+          {row.asin ? (
+            <p className="tw:mt-1 tw:font-mono tw:text-xs tw:text-muted-foreground">
+              {row.asin}
+            </p>
+          ) : null}
+        </TooltipContent>
+      </Tooltip>
+    ),
+  },
   { key: "organic", label: "Organic Units" },
   { key: "ppc", label: "PPC Units" },
   { key: "total", label: "Total Units" },
@@ -91,11 +113,13 @@ export default function UnitsPage() {
                 key:'organicUnits',
                 label: "Organic Units",
                 color: "#98f06c",
+                formatter: "compact",
             },
             adUnits:{
                 key:'adUnits',
                 label: "Ad Units",
                 color: "#f0e96c",
+                formatter: "compact",
             },
         }} />
       <div className="card">

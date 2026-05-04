@@ -169,3 +169,14 @@ export async function requireServerAuth() {
 
   return user;
 }
+
+/**
+ * Enforces authenticated admin; redirects otherwise.
+ */
+export async function requireServerAdmin() {
+  const user = await requireServerAuth();
+  if (user.role !== "admin") {
+    redirect("/reports");
+  }
+  return user;
+}

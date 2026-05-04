@@ -25,8 +25,17 @@ export default function AmazonApiStatus({ initialStatus }) {
   const adsOk = ads?.status === "connected";
   const sellerError = seller?.status === "error" ? seller?.error : null;
   const adsError = ads?.status === "error" ? ads?.error : null;
-  const adsNotSet = ads?.status === "not_configured" || !ads?.status;
-  const adsLabel = adsNotSet ? "Advertising: off (Seller only)" : "Advertising: " + (ads?.status ?? "—");
+  const adsNotConfigured = ads?.status === "not_configured" || ads?.status == null;
+  /** Not an error — optional integration when only Seller Central is used. */
+  const adsLabel = adsNotConfigured
+    ? "Ads API: not configured (seller data only)"
+    : "Advertising: " + (ads?.status ?? "—");
+
+  const adsDotClass = adsOk
+    ? "status-dot connected"
+    : adsError
+      ? "status-dot error"
+      : "status-dot optional";
 
   return (
     <div className="amazon-api-status" role="status" aria-live="polite">
@@ -38,8 +47,13 @@ export default function AmazonApiStatus({ initialStatus }) {
       </span>
       <span className="amazon-api-status-sep" aria-hidden>·</span>
       <span
-        className={adsOk ? "status-dot connected" : adsError ? "status-dot error" : "status-dot"}
-        title={adsError || undefined}
+        className={adsDotClass}
+        title={
+          adsError ||
+          (adsNotConfigured
+            ? "Amazon Advertising API credentials are not set. Reports still work from Seller Central and Cube."
+            : undefined)
+        }
       >
         {adsLabel}
       </span>

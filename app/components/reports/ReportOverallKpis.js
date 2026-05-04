@@ -1,14 +1,16 @@
 "use client";
 
-import {useEffect, useMemo, useState} from "react";
+import { useMemo } from "react";
 import TabBar from "../TabBar";
 import MetricStrip from "../MetricStrip";
 import LineChart from "../LineChart";
 import GaugeChart from "../GaugeChart";
-import ReportsConnectMessage from "../ReportsConnectMessage";
-import { kpiMetricLabels, placeholderChartSeries } from "../../lib/sampleData";
-import {useGraph} from "@/hooks/useGraph.js";
-import {useData} from "@/hooks/useData.js";
+import { placeholderChartSeries } from "../../lib/sampleData";
+import { useData } from "@/hooks/useData.js";
+import {
+  ADS_DAILY_GRAPH_MEASURES,
+  mapAdsCampaignDailyGraphRow,
+} from "@/lib/mapAdsDailyGraphRow.js";
 
 const tabs = [
   { label: "Overall KPIs", href: "/reports/overall-kpis" },
@@ -16,20 +18,12 @@ const tabs = [
   { label: "Seller Central Overview", href: "/reports/seller-central" },
   { label: "Keywords And Search Terms", href: "/reports/keywords" },
   { label: "Campaigns", href: "/reports/campaigns" },
+  { label: "Insights", href: "/reports/callouts" },
 ];
 
 export default function ReportOverallKpis({ initialData }) {
-  const [res, setRes] = useState(null);
-  const [loading, setLoading] = useState(true);
     const {data} = useData({
-        "measures": [
-            "AdsCampaignReports.spend",
-            "AdsCampaignReports.sales",
-            "AdsCampaignReports.acos",
-            "AdsCampaignReports.roas",
-            "AdsCampaignReports.ctr",
-            "AdsCampaignReports.cpc",
-        ],
+        "measures": [...ADS_DAILY_GRAPH_MEASURES],
         "dimensions": [
             "AdsCampaignReports.report_date"
         ],
@@ -39,18 +33,7 @@ export default function ReportOverallKpis({ initialData }) {
                 "granularity": "day"
             }
         ]
-    },(data)=>data.map(item=>{
-        const date = new Date(item['AdsCampaignReports.report_date']);
-        return {
-            date: date.toLocaleDateString(),
-            spend: item['AdsCampaignReports.spend'],
-            sales: item['AdsCampaignReports.sales'],
-            ctr: item['AdsCampaignReports.ctr'],
-            cpc: item['AdsCampaignReports.cpc'],
-            roas: item['AdsCampaignReports.roas'],
-            acos: item['AdsCampaignReports.acos'],
-        }
-    }),"overadskpigraph","AdsCampaignReports.report_date", true, { initialData: initialData?.graphData })
+    },(rows)=>rows.map(mapAdsCampaignDailyGraphRow),"overadskpigraph","AdsCampaignReports.report_date", true, { initialData: initialData?.graphData })
 
     const {data:salesKpis,isLoading:isLoadingSaleKpis} = useData({
         "measures": [
@@ -81,10 +64,10 @@ export default function ReportOverallKpis({ initialData }) {
             formatter:"currency",
         },
         { label: "Total Ad Orders", value: item['AdsCampaignReports.purchases14d'],formatter:"compact" },
-        { label: "Total ROAS", value: item['AdsCampaignReports.acos'],formatter: "percent" },
-        { label: "Total ACOS", value: item['AdsCampaignReports.roas'],formatter:"percent" },
+        { label: "Total ACOS", value: item['AdsCampaignReports.acos'],formatter: "percent" },
+        { label: "Total ROAS", value: item['AdsCampaignReports.roas'],formatter:"percent" },
     ])),"adsoverallkips","AdsCampaignReports.report_date", true, {
-        initialData: initialData?.kpis ? [initialData.kpis.filter(k => k.label.includes("Amount Spent") || k.label.includes("Total Ad Orders") || k.label.includes("Total ROAS") || k.label.includes("Total ACOS"))] : undefined
+        initialData: initialData?.kpis ? [initialData.kpis.filter(k => k.label.includes("Amount Spent") || k.label.includes("Total Ad Orders") || k.label.includes("ROAS") || k.label.includes("ACOS"))] : undefined
     })
 
   const isLoading=useMemo(()=>isLoadingAdsKips||isLoadingSaleKpis,[isLoadingAdsKips,isLoadingSaleKpis])
@@ -99,6 +82,16 @@ export default function ReportOverallKpis({ initialData }) {
         return kips
     },[adsKpis,salesKpis])
 
+    const spendAmount = useMemo(() => {
+        const m = kpis.find((k) => k.label === "Amount Spent ($)");
+        return typeof m?.value === "number" && !Number.isNaN(m.value) ? m.value : 0;
+    }, [kpis]);
+
+    const spendGaugeMax = useMemo(
+        () => Math.max(100, spendAmount * 1.25, 500),
+        [spendAmount]
+    );
+
   if (isLoading) {
     return (
       <div className="grid" style={{ gap: 20 }}>
@@ -109,7 +102,7 @@ export default function ReportOverallKpis({ initialData }) {
   }
 
 
-  const showSpendData = true //!sellerOnly && res?.data?.series?.length > 0;
+  const showSpendData = true;
 
   return (
     <div className="grid" style={{ gap: 20 }}>
@@ -124,26 +117,33 @@ export default function ReportOverallKpis({ initialData }) {
       )}
       <div className="grid grid-2">
         {showSpendData ? (
-          <GaugeChart title="Total Spend" value={300} fill={'#ac6cf0'} max={500} />
+          <GaugeChart
+            title="Total Spend"
+            value={spendAmount}
+            fill="#ac6cf0"
+            max={spendGaugeMax}
+          />
         ) : (
           <GaugeChart title="Total Spend" value={0} max={1} empty />
         )}
         {showSpendData ? (
             <LineChart
                 data={data}
-                title={"Sales vs Spend"}
+                title={"Spend vs ad sales"}
                 xKey={'date'}
                 config={
                     {
-                        sales:{
-                            key:'sales',
-                            name: "Sales",
-                            color: "#ac6cf0",
-                        },
                         spend:{
                             key:'spend',
                             name: "Spend",
                             color: "#6caaf0",
+                            formatter: "currency",
+                        },
+                        adSales:{
+                            key:'sales',
+                            name: "Ad sales",
+                            color: "#ac6cf0",
+                            formatter: "currency",
                         }}
                 }
             />
@@ -151,6 +151,48 @@ export default function ReportOverallKpis({ initialData }) {
           <LineChart title="Spend vs Sales" series={placeholderChartSeries} />
         )}
       </div>
+      {showSpendData ? (
+        <div className={"tw:grid tw:grid-cols-2 tw:gap-2"}>
+          <LineChart
+            data={data}
+            title={"Impressions & clicks"}
+            xKey={"date"}
+            config={{
+              impressions: {
+                key: "impressions",
+                name: "Impressions",
+                color: "#5ad8e6",
+                formatter: "compact",
+              },
+              clicks: {
+                key: "clicks",
+                name: "Clicks",
+                color: "#e8b65a",
+                formatter: "compact",
+              },
+            }}
+          />
+          <LineChart
+            data={data}
+            title={"Spend & ad orders"}
+            xKey={"date"}
+            config={{
+              spend: {
+                key: "spend",
+                name: "Spend",
+                color: "#6caaf0",
+                formatter: "currency",
+              },
+              orders: {
+                key: "purchases14d",
+                name: "Ad orders (14d)",
+                color: "#9ecf7a",
+                formatter: "compact",
+              },
+            }}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

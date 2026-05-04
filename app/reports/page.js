@@ -85,11 +85,12 @@ const reportCard = [
   { href: "/reports/overall-kpis", tag: "Overview", title: "Overall KPIs", description: "Account-wide KPIs across ads + seller central.", stats: ["roas", "acos"],type:'campaign' },
   { href: "/reports/ads-overview", tag: "Advertising", title: "Ads Overview", description: "Daily ad sales, spend, CPC, and CTR trends.", stats: ["sales", "cpc"],type:'campaign' },
   { href: "/reports/seller-central", tag: "Seller Central", title: "Seller Central Overview", description: "P&L distribution with product-level performance.", stats: ["Units", "Profit"],type:'sale' },
-  { href: "/reports/keywords", tag: "Search", title: "Keywords & Search Terms", description: "Top queries, ROAS, and target term performance.", stats: ["Terms", "ROAS"],type:'search' },
+  { href: "/reports/keywords", tag: "Search", title: "Keywords & Search Terms", description: "Targeting keywords, shopper search terms, negative candidates, core phrase rollups, match types, and top harvest terms.", stats: ["Terms", "ROAS"],type:'search' },
   { href: "/reports/campaigns", tag: "Campaigns", title: "Campaigns", description: "Campaign health, spend, and conversions.", stats: ["count", "spend"],type:'campaign' },
   { href: "/reports/inventory-forecast", tag: "Inventory", title: "Inventory Forecast", description: "Restock profiles, stock health, and lead time.", stats: ["SKUs", "Restock"],type:'inventory' },
   { href: "/reports/product-details", tag: "Catalog", title: "Product Details", description: "Editable catalog details and production costs.", stats: ["Active", "Inactive"],type:'fee' },
   { href: "/reports/sales-trend", tag: "Trends", title: "Sales Trend", description: "Weekly sales and margin heatmap.", stats: ["Weeks", "Orders"],type:'sale' },
+  { href: "/reports/callouts", tag: "Insights", title: "Insights", description: "Daily snapshot (once per day), header-range Generate insights, and weekly full audit from your dashboard metrics.", stats: ["Insights", "Trend"], type: "callout" },
 ];
 
 export default function ReportsPage() {
@@ -147,11 +148,12 @@ export default function ReportsPage() {
     { href: "/reports/overall-kpis", tag: "Overview", title: "Overall KPIs", description: "Account-wide KPIs across ads + seller central.", stats: ["roas", "acos"],type:'campaign' },
     { href: "/reports/ads-overview", tag: "Advertising", title: "Ads Overview", description: "Daily ad sales, spend, CPC, and CTR trends.", stats: ["sales", "cpc"],type:'campaign' },
     { href: "/reports/seller-central", tag: "Seller Central", title: "Seller Central Overview", description: "P&L distribution with product-level performance.", stats: ["units", "profit"],type:'sale' },
-    { href: "/reports/keywords", tag: "Search", title: "Keywords & Search Terms", description: "Top queries, ROAS, and target term performance.", stats: ["terms", "roas"],type:'search' },
+    { href: "/reports/keywords", tag: "Search", title: "Keywords & Search Terms", description: "Targeting keywords, shopper search terms, negative candidates, core phrase rollups, match types, and top harvest terms.", stats: ["terms", "roas"],type:'search' },
     { href: "/reports/campaigns", tag: "Campaigns", title: "Campaigns", description: "Campaign health, spend, and conversions.", stats: ["count", "spend"],type:'campaign' },
     { href: "/reports/inventory-forecast", tag: "Inventory", title: "Inventory Forecast", description: "Restock profiles, stock health, and lead time.", stats: ["SKUs", "Restock"],type:'inventory' },
     { href: "/reports/product-details", tag: "Catalog", title: "Product Details", description: "Editable catalog details and production costs.", stats: ["Active", "Inactive"],type:'fee' },
     { href: "/reports/sales-trend", tag: "Trends", title: "Sales Trend", description: "Weekly sales and margin heatmap.", stats: ["Weeks", "Orders"],type:'sale' },
+    { href: "/reports/callouts", tag: "Insights", title: "Insights", description: "Daily snapshot (once per day), header-range Generate insights, and weekly full audit from your dashboard metrics.", stats: ["Insights", "Trend"], type: "callout" },
   ]);
 
   const getStats = (card)=>{
@@ -171,6 +173,19 @@ export default function ReportsPage() {
           ...searchStats[key],
           value:searchData && searchData.length>0 && searchData[0][key]?searchData[0][key]:'--'
         }))
+      case "callout":
+        return [
+          {
+            label: "Insights",
+            value: "GPT narrative",
+            formatter: (v) => v,
+          },
+          {
+            label: "Source",
+            value: "Cube + OpenAI",
+            formatter: (v) => v,
+          },
+        ];
       default:
         return card.stats.map((key) => ({
           label:key,

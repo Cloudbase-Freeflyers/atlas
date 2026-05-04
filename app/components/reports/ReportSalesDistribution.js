@@ -2,6 +2,7 @@
 
 import TabBar from "../../components/TabBar";
 import AreaChart from "../../components/AreaChart";
+import LineChart from "../../components/LineChart";
 import DataTable from "../../components/DataTable";
 import { useData } from "@/hooks/useData.js";
 import { TooltipContent, TooltipTrigger, Tooltip } from "@/components/ui/tooltip.jsx";
@@ -122,6 +123,25 @@ export default function ReportSalesDistribution({ initialData }) {
                 color: "#6cf096",
             }
         }} />
+        <LineChart
+          title="Ad sales vs organic sales"
+          xKey="date"
+          data={graphData}
+          config={{
+            adSales: {
+              key: "adSales",
+              label: "Ad sales",
+              color: "#ac6cf0",
+              formatter: "currency",
+            },
+            organicSales: {
+              key: "organicSales",
+              label: "Organic sales",
+              color: "#6cf096",
+              formatter: "currency",
+            },
+          }}
+        />
       <div className="card">
         <div className="card-inner">
           <DataTable columns={columns} rows={asisData} />

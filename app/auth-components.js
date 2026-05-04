@@ -54,7 +54,7 @@ export const Navigation = () => {
                                     Reports
                                 </a>
                                 {user.role === 'admin' && (
-                                    <a href="/admin/users" className="nav-cta nav-cta-secondary">
+                                    <a href="/admin" className="nav-cta nav-cta-secondary">
                                         Admin
                                     </a>
                                 )}

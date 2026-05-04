@@ -35,17 +35,20 @@ export default function TopBar({ initialCompanies }) {
 
   return (
     <header className="topbar tw:pb-4 tw:pt-2">
-      <div className="topbar-inner">
-        <div className="tw:flex">
-          <CompanySelector initialCompanies={initialCompanies} />
-          <div className="tw:flex-1"></div>
-          <DateRangePicker />
-          <Button >
-            Reset
-          </Button>
-          <Button onClick={handleShare}>
-            {copied ? "Link Copied" : "Share"}
-          </Button>
+      <div className="topbar-inner tw:w-full tw:max-w-full tw:px-3 sm:tw:px-5 md:tw:px-7 tw:box-border">
+        <div className="tw:flex tw:flex-wrap tw:items-center tw:gap-3 tw:w-full">
+          <div className="tw:min-w-0 tw:shrink-0">
+            <CompanySelector initialCompanies={initialCompanies} />
+          </div>
+          <div className="tw:flex tw:flex-wrap tw:items-center tw:gap-2 tw:min-w-0 sm:tw:ml-auto">
+            <DateRangePicker />
+            <Button >
+              Reset
+            </Button>
+            <Button onClick={handleShare}>
+              {copied ? "Link Copied" : "Share"}
+            </Button>
+          </div>
         </div>
       </div>
     </header>
