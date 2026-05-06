@@ -21,34 +21,29 @@ export const AuthProvider = ({ children, initialUser }) => {
   }, [router]);
 
   const checkUser = useCallback(async () => {
-    const token = Cookies.get('auth_token');
+    // auth_token is httpOnly so js-cookie cannot read it — use server action directly
     const sToken = Cookies.get('shareable_token');
 
-    if (!token && !sToken) {
-      setUser(null);
+    if (sToken) {
+      setUser({ email: 'Anonymous', role: 'customer' });
       setLoading(false);
       return;
     }
 
-    if (token) {
-      try {
-        const userData = await getMeAction();
-        if (userData) {
-          setUser(userData);
-        } else {
-          logout();
-        }
-      } catch (error) {
-        console.error('Failed to fetch user:', error);
-        logout();
+    try {
+      const userData = await getMeAction();
+      if (userData) {
+        setUser(userData);
+      } else {
+        setUser(null);
       }
-    } else if (sToken) {
-      // Logic for shareable token (anonymous)
-      setUser({ email: 'Anonymous', role: 'customer' }); // Mock user for anonymous
+    } catch (error) {
+      console.error('Failed to fetch user:', error);
+      setUser(null);
     }
-    
+
     setLoading(false);
-  }, [logout]);
+  }, []);
 
   useEffect(() => {
     // Check for shareable token in URL
@@ -58,8 +53,8 @@ export const AuthProvider = ({ children, initialUser }) => {
       Cookies.set('shareable_token', urlToken, { expires: 7 });
     }
 
-    // If initialUser was not provided, check user status
-    if (initialUser === undefined) {
+    // If no user from server, try to resolve client-side via server action
+    if (!initialUser) {
       checkUser();
     }
   }, [checkUser, initialUser]);
