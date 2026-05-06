@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { updateSpCampaignBudgets } from "../../../../lib/amazon/adsClient.js";
-import { getAdsConfig } from "../../../../lib/amazon/config.js";
+import { updateSpCampaignBudgets } from "../../../lib/amazon/adsClient.js";
+import { getAdsConfig } from "../../../lib/amazon/config.js";
 
 /**
  * POST /api/budget-optimizer/apply
