@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import TabBar from "../TabBar";
+
 import DataTable from "../DataTable";
 import LineChart from "../LineChart.js";
+import AIPageBrief from "../ai/AIPageBrief";
+import AIRowAction from "../ai/AIRowAction";
 import { useData } from "@/hooks/useData.js";
 import {
   ADS_DAILY_GRAPH_MEASURES,
@@ -11,17 +13,11 @@ import {
 } from "@/lib/mapAdsDailyGraphRow.js";
 import { mapCampaignDailyRow } from "@/lib/mapAdsEntityDaily.js";
 
-const tabs = [
-  { label: "Overall KPIs", href: "/reports/overall-kpis" },
-  { label: "Ads Overview", href: "/reports/ads-overview" },
-  { label: "Seller Central Overview", href: "/reports/seller-central" },
-  { label: "Keywords And Search Terms", href: "/reports/keywords" },
-  { label: "Campaigns", href: "/reports/campaigns" },
-  { label: "Insights", href: "/reports/callouts" },
-];
+
 
 const columns = [
   { key: "name", label: "Campaign Name" },
+  { key: "adType", label: "Type" },
   { key: "spend", label: "Spend", formatter: "currency" },
   { key: "impressions", label: "Impressions", formatter: "compact" },
   { key: "clicks", label: "Clicks", formatter: "compact" },
@@ -31,6 +27,7 @@ const columns = [
   { key: "roas", label: "ROAS", formatter: "percent" },
   { key: "ctr", label: "CTR", formatter: "percent" },
   { key: "acos", label: "ACOS", formatter: "percent" },
+  { key: "_ai", label: "", render: (row) => <AIRowAction type="campaign" row={row} /> },
 ];
 
 const campaignDailyPayload = {
@@ -60,6 +57,7 @@ export default function ReportCampaigns({ initialData }) {
       dimensions: [
         "AdsCampaignReports.campaign_name",
         "AdsCampaignReports.campaign_id",
+        "AdsCampaignReports.ad_type",
       ],
       measures: [
         "AdsCampaignReports.clicks",
@@ -77,6 +75,7 @@ export default function ReportCampaigns({ initialData }) {
       data.map((item) => ({
         name: item["AdsCampaignReports.campaign_name"],
         id: item["AdsCampaignReports.campaign_id"],
+        adType: item["AdsCampaignReports.ad_type"] || "",
         clicks: item["AdsCampaignReports.clicks"],
         impressions: item["AdsCampaignReports.impressions"],
         spend: item["AdsCampaignReports.cost"],
@@ -132,7 +131,7 @@ export default function ReportCampaigns({ initialData }) {
   if (isLoading) {
     return (
       <div className="grid" style={{ gap: 20 }}>
-        <TabBar tabs={tabs} active="Campaigns" />
+
         <div className="card">
           <div className="card-inner">
             <p className="reports-loading">Loading…</p>
@@ -142,9 +141,19 @@ export default function ReportCampaigns({ initialData }) {
     );
   }
 
+  const briefMetrics = useMemo(() => {
+    if (!campaigns?.length) return {};
+    const totSpend = campaigns.reduce((s, c) => s + (parseFloat(c.spend) || 0), 0);
+    const totSales = campaigns.reduce((s, c) => s + (parseFloat(c.sales) || 0), 0);
+    const avgAcos = campaigns.reduce((s, c) => s + (parseFloat(c.acos) || 0), 0) / campaigns.length;
+    const avgRoas = campaigns.reduce((s, c) => s + (parseFloat(c.roas) || 0), 0) / campaigns.length;
+    return { "Total Spend": totSpend, "Total Sales (14d)": totSales, "Avg ACOS": avgAcos, "Avg ROAS": avgRoas, "Campaign Count": campaigns.length };
+  }, [campaigns]);
+
   return (
     <div className="grid" style={{ gap: 20 }}>
-      <TabBar tabs={tabs} active="Campaigns" />
+
+      <AIPageBrief page="campaigns" metrics={briefMetrics} title="Campaign Health Brief" />
       <div className="card">
         <div className="card-inner">
           <div className="filter-row">

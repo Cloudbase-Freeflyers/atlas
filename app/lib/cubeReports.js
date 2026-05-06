@@ -337,6 +337,7 @@ export async function getCampaignsData(companyId, startDate, endDate) {
     dimensions: [
       "AdsCampaignReports.campaign_name",
       "AdsCampaignReports.campaign_id",
+      "AdsCampaignReports.ad_type",
     ],
     measures: [
       "AdsCampaignReports.clicks",
@@ -391,6 +392,7 @@ export async function getCampaignsData(companyId, startDate, endDate) {
       campaigns: campaigns.map(item => ({
         name: item['AdsCampaignReports.campaign_name'],
         id: item['AdsCampaignReports.campaign_id'],
+        adType: item['AdsCampaignReports.ad_type'] || '',
         clicks: item['AdsCampaignReports.clicks'],
         impressions: item['AdsCampaignReports.impressions'],
         spend: item['AdsCampaignReports.cost'],
@@ -735,4 +737,72 @@ export async function getInventoryForecastPageData(
     dayCount,
     inventoryRange: [invStart, invEnd],
   };
+}
+
+/**
+ * Fetches data for the Top ASINs report (AdsProductReports — advertised product performance).
+ */
+export async function getTopAsinsData(companyId, startDate, endDate) {
+  if (!companyId) return null;
+
+  const filters = [
+    {
+      member: "Companies.id",
+      operator: "equals",
+      values: [companyId],
+    },
+  ];
+
+  const timeDimensions =
+    startDate && endDate
+      ? [
+          {
+            dimension: "AdsProductReports.report_date",
+            dateRange: [startDate, endDate],
+          },
+        ]
+      : [];
+
+  const asinsQuery = {
+    dimensions: [
+      "AdsProductReports.advertised_asin",
+      "AdsProductReports.advertised_sku",
+    ],
+    measures: [
+      "AdsProductReports.impressions",
+      "AdsProductReports.clicks",
+      "AdsProductReports.cost",
+      "AdsProductReports.sales14d",
+      "AdsProductReports.purchases14d",
+      "AdsProductReports.roas",
+      "AdsProductReports.acos",
+      "AdsProductReports.ctr",
+      "AdsProductReports.cpc",
+    ],
+    order: { "AdsProductReports.sales14d": "desc" },
+    filters,
+    timeDimensions,
+  };
+
+  try {
+    const rows = await fetchCubeData(asinsQuery);
+    return {
+      asins: rows.map((item) => ({
+        asin: item["AdsProductReports.advertised_asin"] || "",
+        sku: item["AdsProductReports.advertised_sku"] || "",
+        impressions: item["AdsProductReports.impressions"],
+        clicks: item["AdsProductReports.clicks"],
+        spend: item["AdsProductReports.cost"],
+        sales: item["AdsProductReports.sales14d"],
+        orders: item["AdsProductReports.purchases14d"],
+        roas: item["AdsProductReports.roas"],
+        acos: item["AdsProductReports.acos"],
+        ctr: item["AdsProductReports.ctr"],
+        cpc: item["AdsProductReports.cpc"],
+      })),
+    };
+  } catch (error) {
+    console.error("Error fetching Top ASINs data:", error);
+    return null;
+  }
 }

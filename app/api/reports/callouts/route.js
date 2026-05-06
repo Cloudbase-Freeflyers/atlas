@@ -49,6 +49,7 @@ export async function POST(request) {
     startDate,
     endDate
   );
+  console.log("[callouts] bundle:", JSON.stringify({ ok: bundle.ok, errors: bundle.errors, adsCurrent: bundle.adsCurrent, pnlCurrent: bundle.pnlCurrent }, null, 2));
   const userPrompt = buildCalloutUserPrompt({
     companyName: companyName || `Company ${companyId}`,
     bundle,

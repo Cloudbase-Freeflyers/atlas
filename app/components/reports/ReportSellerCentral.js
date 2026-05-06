@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import TabBar from "../TabBar";
+
 import AreaChart from "../AreaChart";
 import LineChart from "../LineChart";
 import DataTable from "../DataTable";
@@ -10,13 +10,7 @@ import { placeholderChartSeries } from "../../lib/sampleData";
 import {useData} from "@/hooks/useData.js";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.jsx";
 
-const tabs = [
-  { label: "Sales distribution", href: "/reports/seller-central/sales-distribution" },
-  { label: "P&L distribution", href: "/reports/seller-central" },
-  { label: "Units", href: "/reports/seller-central/units" },
-  { label: "Sessions", href: "/reports/seller-central/sessions" },
-  { label: "PPC", href: "/reports/seller-central/ppc" },
-];
+
 
 const columns = [
   { key: "product", label: "Product",maxWidth: "250px",
@@ -109,7 +103,7 @@ export default function ReportSellerCentral({ initialData }) {
   if (isLoading) {
     return (
       <div className="grid" style={{ gap: 20 }}>
-        <TabBar tabs={tabs} active="P&L distribution" />
+
         <div className="card"><div className="card-inner"><p className="reports-loading">Loading…</p></div></div>
       </div>
     );
@@ -119,7 +113,7 @@ export default function ReportSellerCentral({ initialData }) {
 
   return (
     <div className="grid" style={{ gap: 20 }}>
-      <TabBar tabs={tabs} active="P&L distribution" />
+
       <AreaChart title="P&L Distribution" xKey={'date'} data={graphData} config={{
         adCost:{
           key:'adCost',

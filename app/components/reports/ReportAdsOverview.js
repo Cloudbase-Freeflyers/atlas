@@ -1,22 +1,17 @@
 "use client";
 
-import TabBar from "../TabBar";
+import { useMemo } from "react";
+
 import MetricGrid from "../MetricGrid";
 import LineChart from "../LineChart";
+import AIPageBrief from "../ai/AIPageBrief";
 import { useData } from "@/hooks/useData.js";
 import {
   ADS_DAILY_GRAPH_MEASURES,
   mapAdsCampaignDailyGraphRow,
 } from "@/lib/mapAdsDailyGraphRow.js";
 
-const tabs = [
-  { label: "Overall KPIs", href: "/reports/overall-kpis" },
-  { label: "Ads Overview", href: "/reports/ads-overview" },
-  { label: "Seller Central Overview", href: "/reports/seller-central" },
-  { label: "Keywords And Search Terms", href: "/reports/keywords" },
-  { label: "Campaigns", href: "/reports/campaigns" },
-  { label: "Insights", href: "/reports/callouts" },
-];
+
 
 export default function ReportAdsOverview({ initialData }) {
   const { data } = useData(
@@ -103,7 +98,7 @@ export default function ReportAdsOverview({ initialData }) {
   if (isLoading) {
     return (
       <div className="grid" style={{ gap: 20 }}>
-        <TabBar tabs={tabs} active="Ads Overview" />
+
         <div className="card">
           <div className="card-inner">
             <p className="reports-loading">Loading…</p>
@@ -113,9 +108,17 @@ export default function ReportAdsOverview({ initialData }) {
     );
   }
 
+  const briefMetrics = useMemo(() => {
+    if (!metrics?.length) return {};
+    const m = {};
+    metrics[0].forEach((k) => { if (k.value != null) m[k.label] = k.value; });
+    return m;
+  }, [metrics]);
+
   return (
     <div className="grid" style={{ gap: 20 }}>
-      <TabBar tabs={tabs} active="Ads Overview" />
+
+      <AIPageBrief page="ads-overview" metrics={briefMetrics} title="Ads Performance Brief" />
       <p className="reports-api-badge" aria-hidden>
         Live data from Amazon Advertising
       </p>

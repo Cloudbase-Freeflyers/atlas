@@ -1,5 +1,9 @@
 import { Providers } from "./Providers"
-import { AuthGuard, Navigation } from "./auth-components"
+import { AuthGuard } from "./auth-components"
+import AppSidebar from "./components/shell/AppSidebar"
+import AppBody from "./components/shell/AppBody"
+import CommandPalette from "./components/shell/CommandPalette"
+import ChatPanel from "./components/chat/ChatPanel"
 import { getServerUser } from "./lib/serverApi"
 import "./tailwind.css"
 
@@ -27,10 +31,10 @@ export default async function RootLayout({ children }) {
             <body className={"dark"}>
                 <Providers initialUser={initialUser}>
                     <AuthGuard>
-                        <Navigation />
-                        <div className="tw:mt-[92px]">
-                            {children}
-                        </div>
+                        <AppSidebar />
+                        <CommandPalette />
+                        <ChatPanel />
+                        <AppBody>{children}</AppBody>
                     </AuthGuard>
                 </Providers>
             </body>

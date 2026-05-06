@@ -1,19 +1,13 @@
 "use client";
 
-import TabBar from "../../components/TabBar";
+
 import AreaChart from "../../components/AreaChart";
 import LineChart from "../../components/LineChart";
 import DataTable from "../../components/DataTable";
 import { useData } from "@/hooks/useData.js";
 import { TooltipContent, TooltipTrigger, Tooltip } from "@/components/ui/tooltip.jsx";
 
-const tabs = [
-  { label: "Sales distribution", href: "/reports/seller-central/sales-distribution" },
-  { label: "P&L distribution", href: "/reports/seller-central" },
-  { label: "Units", href: "/reports/seller-central/units" },
-  { label: "Sessions", href: "/reports/seller-central/sessions" },
-  { label: "PPC", href: "/reports/seller-central/ppc" },
-];
+
 
 const columns = [
   { key: "product", label: "Product", maxWidth: "250px",
@@ -96,7 +90,7 @@ export default function ReportSalesDistribution({ initialData }) {
   if (isLoading) {
     return (
       <div className="grid" style={{ gap: 20 }}>
-        <TabBar tabs={tabs} active="Sales distribution" />
+
         <div className="card"><div className="card-inner"><p className="reports-loading">Loading…</p></div></div>
       </div>
     );
@@ -104,7 +98,7 @@ export default function ReportSalesDistribution({ initialData }) {
 
   return (
     <div className="grid" style={{ gap: 20 }}>
-      <TabBar tabs={tabs} active="Sales distribution" />
+
       <p className="reports-api-badge" aria-hidden>Live data from Amazon Seller Central</p>
         <AreaChart title="Sales distribution" xKey={'date'} data={graphData} config={{
             adCost:{

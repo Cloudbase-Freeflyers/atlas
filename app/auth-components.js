@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 const PUBLIC_ROUTES = ['/', '/login', '/signup'];
+const SIDEBAR_ROUTES = ['/reports', '/admin'];
 
 export const AuthGuard = ({ children }) => {
   const { user, loading, isAnonymous } = useAuth();
@@ -30,54 +31,3 @@ export const AuthGuard = ({ children }) => {
 
   return children;
 };
-
-export const Navigation = () => {
-    const { user, logout, isAnonymous } = useAuth();
-    const pathname = usePathname();
-    
-    // Don't show generic nav on login/signup pages
-    if (['/login', '/signup'].includes(pathname)) return null;
-
-    return (
-        <nav className="nav">
-            <div className="container">
-                <div className="nav-content">
-                    <a href="/" className="nav-logo">
-                        <span className="logo-text">C6</span>
-                        <span className="logo-divider">/</span>
-                        <span className="logo-sub">Atlas</span>
-                    </a>
-                    <div className="nav-actions">
-                        {user && !isAnonymous ? (
-                            <>
-                                <a href="/reports" className="nav-cta nav-cta-secondary">
-                                    Reports
-                                </a>
-                                {user.role === 'admin' && (
-                                    <a href="/admin" className="nav-cta nav-cta-secondary">
-                                        Admin
-                                    </a>
-                                )}
-                                <button onClick={logout} className="nav-cta">
-                                    Logout
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                {isAnonymous && (
-                                    <span className="tw:text-xs tw:text-zinc-500 tw:bg-white/5 tw:px-2 tw:py-1 tw:rounded">Guest View</span>
-                                )}
-                                <a href="/login" className="nav-cta nav-cta-secondary">
-                                    Login
-                                </a>
-                                <a href="#contact" className="nav-cta">
-                                    Get Started
-                                </a>
-                            </>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </nav>
-    );
-}

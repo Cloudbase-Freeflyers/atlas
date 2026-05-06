@@ -1,20 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import TabBar from "../../../components/TabBar";
+
 import LineChart from "../../../components/LineChart";
 import DataTable from "../../../components/DataTable";
 import ReportsConnectMessage from "../../../components/ReportsConnectMessage";
 import { placeholderChartSeries } from "../../../lib/sampleData";
 import {useData} from "@/hooks/useData.js";
 
-const tabs = [
-  { label: "Sales distribution", href: "/reports/seller-central/sales-distribution" },
-  { label: "P&L distribution", href: "/reports/seller-central" },
-  { label: "Units", href: "/reports/seller-central/units" },
-  { label: "Sessions", href: "/reports/seller-central/sessions" },
-  { label: "PPC", href: "/reports/seller-central/ppc" },
-];
+
 
 const columns = [
   { key: "asin", label: "ASIN" },
@@ -70,14 +64,14 @@ export default function SessionsPage() {
   if (isLoading) {
     return (
         <div className="grid" style={{ gap: 20 }}>
-          <TabBar tabs={tabs} active="Sessions" />
+
           <div className="card"><div className="card-inner"><p className="reports-loading">Loading…</p></div></div>
         </div>
     );
   }
   return (
     <div className="grid" style={{ gap: 20 }}>
-      <TabBar tabs={tabs} active="Sessions" />
+
       <p className="reports-api-badge" aria-hidden>Live data from Amazon Seller Central</p>
       <div className={"tw:grid tw:grid-cols-2 tw:gap-2"}>
         <LineChart title="Sessions + Unit Session %" xKey={'date'} data={data} config={{

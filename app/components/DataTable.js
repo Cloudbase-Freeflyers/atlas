@@ -215,6 +215,7 @@ export default function DataTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="tw:group"
                 >
                   {row.getVisibleCells().map((cell) => {
                     const maxWidth = cell.column.columnDef.maxWidth;

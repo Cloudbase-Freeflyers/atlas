@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import TabBar from "../../../components/TabBar";
 import LineChart from "../../../components/LineChart";
 import DataTable from "../../../components/DataTable";
 import ReportsConnectMessage from "../../../components/ReportsConnectMessage";
@@ -9,13 +8,6 @@ import { placeholderChartSeries } from "../../../lib/sampleData";
 import {useData} from "@/hooks/useData.js";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.jsx";
 
-const tabs = [
-  { label: "Sales distribution", href: "/reports/seller-central/sales-distribution" },
-  { label: "P&L distribution", href: "/reports/seller-central" },
-  { label: "Units", href: "/reports/seller-central/units" },
-  { label: "Sessions", href: "/reports/seller-central/sessions" },
-  { label: "PPC", href: "/reports/seller-central/ppc" },
-];
 
 const columns = [
   {
@@ -97,7 +89,6 @@ export default function UnitsPage() {
   if (isLoading) {
     return (
       <div className="grid" style={{ gap: 20 }}>
-        <TabBar tabs={tabs} active="Units" />
         <div className="card"><div className="card-inner"><p className="reports-loading">Loading…</p></div></div>
       </div>
     );
@@ -105,7 +96,6 @@ export default function UnitsPage() {
 
   return (
     <div className="grid" style={{ gap: 20 }}>
-      <TabBar tabs={tabs} active="Units" />
       <p className="reports-api-badge" aria-hidden>Live data from Amazon Seller Central</p>
       {/*{series.length > 0 && <LineChart title="Units (last 30 days)" series={series} />}*/}
         <LineChart title="Units: Organic vs PPC" xKey={'date'} data={graphData} config={{

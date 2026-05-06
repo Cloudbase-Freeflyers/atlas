@@ -2,6 +2,7 @@
 
 import { FiltersProvider } from "./lib/FiltersContext";
 import { AuthProvider } from "./lib/authContext";
+import { ShellProvider } from "./lib/ShellContext";
 import {
   QueryClient,
   QueryClientProvider,
@@ -15,9 +16,11 @@ export function Providers({ children, initialUser }) {
       <QueryClientProvider client={queryClient}>
           <TooltipProvider>
           <AuthProvider initialUser={initialUser}>
-              <FiltersProvider>
-                  {children}
-              </FiltersProvider>
+              <ShellProvider>
+                <FiltersProvider>
+                    {children}
+                </FiltersProvider>
+              </ShellProvider>
           </AuthProvider>
         <ReactQueryDevtools />
           </TooltipProvider>

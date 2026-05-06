@@ -1923,7 +1923,7 @@ textarea.form-input {
   box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
 }
 
-/* ===== App Layout Styles ===== */
+/* ===== App Layout Styles (legacy — kept for landing page) ===== */
 .app-shell {
   min-height: 100vh;
   display: flex;
@@ -1938,6 +1938,24 @@ textarea.form-input {
 
 .app-content .container {
   max-width: 1400px;
+}
+
+/* ===== Sidebar App Shell ===== */
+.atlas-sidebar-shell {
+  display: flex;
+  min-height: 100vh;
+  background: #0a0a0a;
+}
+
+.atlas-main-content {
+  flex: 1;
+  min-width: 0;
+  transition: margin-left 0.3s ease;
+}
+
+/* Hide legacy top nav when sidebar is active */
+body.has-sidebar .nav {
+  display: none;
 }
 
 /* ===== CSS Variable Aliases for Components ===== */

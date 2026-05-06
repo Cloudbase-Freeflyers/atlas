@@ -182,6 +182,54 @@ export async function getReportStatus(reportId) {
 }
 
 /**
+ * Update daily budgets for Sponsored Products campaigns.
+ * Fetches all active SP campaigns, matches by name to recommendations, then PUTs updates.
+ * @param {Array<{ campaignName: string, recommendedBudget: number }>} recommendations
+ * @returns {Promise<Array<{ campaignName: string, dailyBudget: number }>>}
+ */
+export async function updateSpCampaignBudgets(recommendations) {
+  // Fetch current campaigns to get their IDs
+  const listRes = await adsApiRequest("/sp/campaigns?stateFilter=enabled&count=200");
+  if (!listRes.ok) {
+    const err = await listRes.text();
+    throw new Error(`Failed to list campaigns (${listRes.status}): ${err}`);
+  }
+  const { campaigns: liveCampaigns = [] } = await listRes.json();
+
+  // Build name → id map (case-insensitive)
+  const nameToId = {};
+  for (const c of liveCampaigns) {
+    nameToId[(c.name ?? "").toLowerCase()] = c.campaignId;
+  }
+
+  // Build update payload — only for campaigns we can match
+  const updates = [];
+  const applied = [];
+  for (const rec of recommendations) {
+    const id = nameToId[(rec.campaignName ?? "").toLowerCase()];
+    if (id) {
+      updates.push({ campaignId: id, dailyBudget: rec.recommendedBudget });
+      applied.push({ campaignName: rec.campaignName, dailyBudget: rec.recommendedBudget });
+    }
+  }
+
+  if (!updates.length) {
+    throw new Error("No campaign name matches found in the Amazon Ads account. Ensure campaign names match exactly.");
+  }
+
+  const putRes = await adsApiRequest("/sp/campaigns", {
+    method: "PUT",
+    body: JSON.stringify(updates),
+  });
+  if (!putRes.ok) {
+    const err = await putRes.text();
+    throw new Error(`Failed to update campaign budgets (${putRes.status}): ${err}`);
+  }
+
+  return applied;
+}
+
+/**
  * Normalize Ads API campaigns list to app's campaignRows shape.
  * @param {Array<{ campaignId: string, name: string, state: string }>} campaigns
  * @param {Record<string, { spend?: number, sales?: number, impressions?: number, clicks?: number, orders?: number }>} [metricsByCampaign]

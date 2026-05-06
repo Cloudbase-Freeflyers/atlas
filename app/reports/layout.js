@@ -2,7 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import AmazonApiStatus from "../components/AmazonApiStatus";
-import TopBar from "../components/TopBar";
+import AppTopBar from "../components/shell/AppTopBar";
 import { getServerCompanies, getAmazonStatus, requireServerAuth } from "../lib/serverApi";
 
 export default async function ReportsLayout({ children }) {
@@ -13,16 +13,12 @@ export default async function ReportsLayout({ children }) {
   ]);
 
   return (
-    <>
-      <div className="app-shell">
-        <main className="app-content tw:min-w-0">
-          <TopBar initialCompanies={companies} />
-          <AmazonApiStatus initialStatus={amazonStatus} />
-          <div className="container tw:min-w-0 tw:w-full tw:max-w-full">
-            {children}
-          </div>
-        </main>
+    <div className="tw:flex tw:flex-col tw:min-h-screen tw:bg-zinc-950">
+      <AppTopBar initialCompanies={companies} />
+      <AmazonApiStatus initialStatus={amazonStatus} />
+      <div className="tw:flex-1 tw:min-w-0 tw:w-full tw:p-5 tw:max-w-full">
+        {children}
       </div>
-    </>
+    </div>
   );
 }

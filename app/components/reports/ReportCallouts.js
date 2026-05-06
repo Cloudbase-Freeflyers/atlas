@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { format, subDays } from "date-fns";
-import TabBar from "../TabBar";
+
 import { Button } from "../ui/button.jsx";
 import { useFilters } from "@/lib/FiltersContext.js";
 import { useMyCompanies } from "@/hooks/useUsers";
@@ -22,6 +22,7 @@ const navTabs = [
   { label: "Seller Central Overview", href: "/reports/seller-central" },
   { label: "Keywords And Search Terms", href: "/reports/keywords" },
   { label: "Campaigns", href: "/reports/campaigns" },
+  { label: "Top ASINs", href: "/reports/top-asins" },
   { label: "Insights", href: "/reports/callouts" },
 ];
 
@@ -218,7 +219,7 @@ export default function ReportCallouts() {
 
   return (
     <div className="grid" style={{ gap: 20 }}>
-      <TabBar tabs={navTabs} active="Insights" />
+
 
       <div className="card">
         <div className="card-inner">
